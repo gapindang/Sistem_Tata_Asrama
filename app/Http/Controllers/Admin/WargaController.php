@@ -12,7 +12,6 @@ class WargaController extends Controller
     {
         $query = Pengguna::query()->where('role', 'warga');
 
-        // Filter by blok / kamar
         if ($request->filled('blok')) {
             $query->where('blok', $request->blok);
         }
