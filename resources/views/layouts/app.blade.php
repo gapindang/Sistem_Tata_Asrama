@@ -62,7 +62,7 @@
         @endif
     @endif
 
-    <div class="content">
+    <div class="content" id="main-content">
         @yield('content')
     </div>
 

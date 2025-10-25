@@ -1,8 +1,9 @@
-@extends('layouts.app')
+@if (!request()->ajax())
+    @extends('layouts.app')
+    @section('title', 'Dashboard Admin')
+    @section('content')
+    @endif
 
-@section('title', 'Dashboard Admin')
-
-@section('content')
     <div class="container mt-4">
         <h2>Dashboard Admin</h2>
         <hr>
@@ -27,4 +28,7 @@
             </div>
         </div>
     </div>
-@endsection
+
+    @if (!request()->ajax())
+    @endsection
+@endif

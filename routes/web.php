@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DendaController;
 use App\Http\Controllers\Admin\KalenderController;
 use App\Http\Controllers\Admin\LaporanController;
@@ -15,7 +15,14 @@ use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\WargaController;
+use App\Http\Controllers\Admin\PetugasController;
 use App\Models\Pelanggaran;
+
+use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
+use App\Http\Controllers\Petugas\PelanggaranController as PetugasPelanggaranController;
+
+use App\Http\Controllers\Warga\DashboardController as WargaDashboardController;
+use App\Http\Controllers\Warga\ProfilController as WargaProfilController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -74,7 +81,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(['auth:admin'])
         ->group(function () {
 
-            Route::get('/dashboard', [DashboardController::class, 'index'])
+            Route::get('/dashboard', [AdminDashboardController::class, 'index'])
                 ->name('admin.dashboard');
 
             Route::get('/notifikasi', [NotifikasiController::class, 'index'])
@@ -138,18 +145,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/penghargaan/{id}', [PenghargaanController::class, 'show'])
                 ->name('admin.penghargaan.show');
 
-            Route::get('/denda', [DendaController::class, 'index'])
-                ->name('admin.denda.index');
-            Route::get('/denda/create', [DendaController::class, 'create'])
-                ->name('admin.denda.create');
-            Route::post('/denda', [DendaController::class, 'store'])
-                ->name('admin.denda.store');
-            Route::get('/denda/{id}/edit', [DendaController::class, 'edit'])
-                ->name('admin.denda.edit');
-            Route::put('/denda/{id}', [DendaController::class, 'update'])
-                ->name('admin.denda.update');
-            Route::delete('/denda/{id}', [DendaController::class, 'destroy'])
-                ->name('admin.denda.destroy');
+            Route::get('/denda', [DendaController::class, 'index'])->name('admin.denda.index');
+            Route::post('/denda', [DendaController::class, 'store'])->name('admin.denda.store');
+            Route::put('/denda/{id}', [DendaController::class, 'update'])->name('admin.denda.update');
+            Route::delete('/denda/{id}', [DendaController::class, 'destroy'])->name('admin.denda.destroy');
 
             Route::get('/kalender', [KalenderController::class, 'index'])
                 ->name('admin.kalender.index');
@@ -163,13 +162,33 @@ Route::middleware(['auth'])->group(function () {
                 ->name('admin.pengaturan.index');
             Route::post('/pengaturan/update', [PengaturanController::class, 'update'])
                 ->name('admin.pengaturan.update');
+
+            Route::get('/petugas', [PetugasController::class, 'index'])->name('admin.petugas.index');
+            Route::get('/petugas/create', [PetugasController::class, 'create'])->name('admin.petugas.create');
+            Route::post('/petugas', [PetugasController::class, 'store'])->name('admin.petugas.store');
+            Route::get('/petugas/{id}/edit', [PetugasController::class, 'edit'])->name('admin.petugas.edit');
+            Route::put('/petugas/{id}', [PetugasController::class, 'update'])->name('admin.petugas.update');
+            Route::delete('/petugas/{id}', [PetugasController::class, 'destroy'])->name('admin.petugas.destroy');
         });
 
     Route::prefix('petugas')->middleware('auth:petugas')->group(function () {
-        Route::get('/dashboard', fn() => view('petugas.dashboard'))->name('petugas.dashboard');
+        Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('petugas.dashboard');
+        Route::resource('/pelanggaran', PetugasPelanggaranController::class);
+        Route::resource('/warga', \App\Http\Controllers\Petugas\WargaController::class);
+        Route::resource('/penghargaan', \App\Http\Controllers\Petugas\PenghargaanController::class);
+        Route::get('/laporan', [\App\Http\Controllers\Petugas\LaporanController::class, 'index'])->name('petugas.laporan.index');
+        Route::get('/profil', [\App\Http\Controllers\Petugas\ProfilController::class, 'index'])->name('petugas.profil.index');
     });
 
+
     Route::prefix('warga')->middleware('auth:warga')->group(function () {
-        Route::get('/dashboard', fn() => view('warga.dashboard'))->name('warga.dashboard');
+        Route::get('/dashboard', [WargaDashboardController::class, 'index'])->name('warga.dashboard');
+        Route::get('/profil', [WargaProfilController::class, 'index'])->name('warga.profil.index');
+        Route::resource('/pelanggaran', \App\Http\Controllers\Warga\PelanggaranController::class);
+        Route::resource('/penghargaan', \App\Http\Controllers\Warga\PenghargaanController::class);
+        Route::resource('/denda', \App\Http\Controllers\Warga\DendaController::class);
+        Route::get('/statistik', [\App\Http\Controllers\Warga\StatistikController::class, 'index'])->name('warga.statistik.index');
+        Route::get('/pesan', [\App\Http\Controllers\Warga\PesanController::class, 'index'])->name('warga.pesan.index');
+        Route::get('/notifikasi', [\App\Http\Controllers\Warga\NotifikasiController::class, 'index'])->name('warga.notifikasi.index');
     });
 });
