@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('id_user');
             $table->string('pesan');
             $table->enum('jenis', ['pelanggaran', 'penghargaan', 'denda', 'umum']);
-            $table->dateTime('tanggal')->default(now());
+            $table->dateTime('tanggal')->useCurrent();
             $table->boolean('status_baca')->default(false);
             $table->timestamps();
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pemberitahuans');
+        Schema::dropIfExists('pemberitahuan');
     }
 };
