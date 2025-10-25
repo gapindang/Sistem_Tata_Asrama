@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
+use App\Models\WargaAsrama;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -13,14 +14,15 @@ class SearchController extends Controller
 
     public function search(Request $request)
     {
-        $keyword = $request->input('keyword');
+        $query = WargaAsrama::query();
 
-        // Implement your search logic here
-        // For example, searching in Pengguna model
-        $results = \App\Models\Pengguna::where('nama', 'like', '%' . $keyword . '%')
-            ->orWhere('email', 'like', '%' . $keyword . '%')
-            ->get();
+        if ($request->filled('q')) {
+            $query->where('nama', 'like', '%' . $request->q . '%')
+                  ->orWhere('nim', 'like', '%' . $request->q . '%');
+        }
 
-        return view('admin.search.results', compact('results', 'keyword'));
+        $results = $query->get();
+
+        return view('admin.search.results', compact('results'));
     }
 }

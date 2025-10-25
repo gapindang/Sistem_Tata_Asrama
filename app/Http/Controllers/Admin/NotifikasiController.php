@@ -10,18 +10,24 @@ class NotifikasiController extends Controller
 {
     public function index()
     {
-        $notifikasi = Pemberitahuan::with('pengguna')
-            ->latest('tanggal')
-            ->get();
-
+        $notifikasi = Pemberitahuan::with('pengguna')->orderBy('tanggal', 'desc')->get();
         return view('admin.notifikasi.index', compact('notifikasi'));
     }
 
     public function markAsRead($id)
     {
         $notif = Pemberitahuan::findOrFail($id);
-        $notif->update(['status_baca' => true]);
+        $notif->status_baca = 1;
+        $notif->save();
 
-        return redirect()->back()->with('success', 'Notifikasi ditandai sudah dibaca.');
+        return redirect()->route('admin.notifikasi.index')->with('success', 'Notifikasi ditandai terbaca.');
+    }
+
+    public function destroy($id)
+    {
+        $notif = Pemberitahuan::findOrFail($id);
+        $notif->delete();
+
+        return redirect()->route('admin.notifikasi.index')->with('success', 'Notifikasi berhasil dihapus.');
     }
 }

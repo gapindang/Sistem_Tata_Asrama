@@ -1,13 +1,16 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
+use App\Models\WargaAsrama;
 use Illuminate\Http\Request;
 
 class RiwayatController extends Controller
 {
-    public function index()
+    public function index($id)
     {
-        return view('admin.riwayat.index');
+        $warga = WargaAsrama::with(['riwayatPelanggaran', 'riwayatPenghargaan'])->findOrFail($id);
+        return view('admin.warga.riwayat', compact('warga'));
     }
 }
