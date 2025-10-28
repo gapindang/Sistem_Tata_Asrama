@@ -40,6 +40,18 @@ return [
             'driver' => 'session',
             'provider' => 'pengguna',
         ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'pengguna',
+        ],
+        'petugas' => [
+            'driver' => 'session',
+            'provider' => 'pengguna',
+        ],
+        'warga' => [
+            'driver' => 'session',
+            'provider' => 'pengguna',
+        ],
     ],
 
     /*

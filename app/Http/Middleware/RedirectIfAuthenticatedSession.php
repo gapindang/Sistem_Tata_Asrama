@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfAuthenticatedSession
@@ -15,15 +16,17 @@ class RedirectIfAuthenticatedSession
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (session()->has('id_user')) {
-            // Sudah login → arahkan sesuai role
-            switch (session('role')) {
+        if (Auth::check()) {
+            $role = Auth::user()->role ?? null;
+            switch ($role) {
                 case 'admin':
                     return redirect()->route('admin.dashboard');
                 case 'petugas':
                     return redirect()->route('petugas.dashboard');
                 case 'warga':
                     return redirect()->route('warga.dashboard');
+                default:
+                    return redirect('/');
             }
         }
 
