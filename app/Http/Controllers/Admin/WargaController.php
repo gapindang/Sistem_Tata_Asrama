@@ -6,12 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Pengguna;
 use App\Models\WargaAsrama;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class WargaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $wargas = WargaAsrama::all();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'wargas' => $wargas
+            ]);
+        }
+
         return view('admin.warga.index', compact('wargas'));
     }
 
@@ -28,17 +38,75 @@ class WargaController extends Controller
             'kamar' => 'required|string|max:20',
             'angkatan' => 'required|integer',
             'status' => 'required|in:aktif,nonaktif',
+            'email' => 'required|email|unique:pengguna,email',
+            'password' => 'required|min:6',
         ]);
 
-        WargaAsrama::create($validated);
+        DB::beginTransaction();
 
-        return redirect()->route('admin.warga.index')->with('success', 'Data warga berhasil ditambahkan.');
+        try {
+            $pengguna = Pengguna::create([
+                'id_user' => Str::uuid(),
+                'nama' => $validated['nama'],
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password']),
+                'role' => 'warga',
+            ]);
+
+            $warga = WargaAsrama::create([
+                'id_warga' => Str::uuid(),
+                'id_user' => $pengguna->id_user,
+                'nama' => $validated['nama'],
+                'nim' => $validated['nim'],
+                'kamar' => $validated['kamar'],
+                'angkatan' => $validated['angkatan'],
+                'status' => $validated['status'],
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Warga dan pengguna berhasil dibuat!',
+                'data' => [
+                    'pengguna' => $pengguna,
+                    'warga' => $warga,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function edit($id)
     {
         $warga = WargaAsrama::findOrFail($id);
-        return view('admin.warga.edit', compact('warga'));
+    }
+
+    public function show($id)
+    {
+        $warga = WargaAsrama::with([
+            'riwayatPelanggaran.pelanggaran',
+            'riwayatPenghargaan.penghargaan'
+        ])->findOrFail($id);
+
+        return response()->json(['data' => $warga]);
+    }
+
+    public function destroy($id)
+    {
+        $warga = WargaAsrama::findOrFail($id);
+        $warga->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data warga berhasil dihapus!',
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -55,21 +123,11 @@ class WargaController extends Controller
 
         $warga->update($validated);
 
-        return redirect()->route('admin.warga.index')->with('success', 'Data warga berhasil diperbarui.');
-    }
-
-    public function destroy($id)
-    {
-        $warga = WargaAsrama::findOrFail($id);
-        $warga->delete();
-
-        return redirect()->route('admin.warga.index')->with('success', 'Data warga berhasil dihapus.');
-    }
-
-    public function show($id)
-    {
-        $warga = WargaAsrama::with(['riwayatPelanggaran', 'riwayatPenghargaan'])->findOrFail($id);
-        return view('admin.warga.show', compact('warga'));
+        return response()->json([
+            'success' => true,
+            'message' => 'Data warga berhasil diperbarui!',
+            'data' => $warga,
+        ]);
     }
 
     public function filter(Request $request)
@@ -91,6 +149,9 @@ class WargaController extends Controller
 
         $wargas = $query->get();
 
-        return view('admin.warga.index', compact('wargas'));
+        return response()->json([
+            'success' => true,
+            'wargas' => $wargas,
+        ]);
     }
 }
