@@ -3,25 +3,120 @@
 namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
-use App\Models\Pengguna;
+use App\Models\WargaAsrama;
 use Illuminate\Http\Request;
 
 class WargaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pengguna::query()->where('role', 'warga');
+        $query = WargaAsrama::query();
+
+        if ($request->filled('nama')) {
+            $query->where('nama', 'like', '%' . $request->nama . '%');
+        }
+
+        if ($request->filled('nim')) {
+            $query->where('nim', 'like', '%' . $request->nim . '%');
+        }
 
         if ($request->filled('blok')) {
-            $query->where('blok', $request->blok);
+            $query->where('kamar', 'like', $request->blok . '%');
         }
+
         if ($request->filled('kamar')) {
             $query->where('kamar', $request->kamar);
         }
 
-        $warga = $query->get();
+        if ($request->filled('angkatan')) {
+            $query->where('angkatan', $request->angkatan);
+        }
 
-        return view('petugas.warga.index', compact('warga'));
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $warga = $query->orderBy('nama')->paginate(20);
+
+        // Get unique blok and kamar for filter dropdowns
+        $bloks = WargaAsrama::distinct()
+            ->pluck('kamar')
+            ->map(function ($kamar) {
+                return explode('-', $kamar)[0] ?? $kamar;
+            })
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        $kamarByBlok = [];
+        if ($request->filled('blok')) {
+            $kamarByBlok = WargaAsrama::where('kamar', 'like', $request->blok . '%')
+                ->distinct()
+                ->pluck('kamar')
+                ->sort()
+                ->values()
+                ->all();
+        }
+
+        return view('petugas.warga.index', [
+            'warga' => $warga,
+            'bloks' => $bloks,
+            'kamarByBlok' => $kamarByBlok,
+        ]);
+    }
+
+    public function getKamarByBlok(Request $request)
+    {
+        $blok = $request->blok;
+        $kamar = WargaAsrama::where('kamar', 'like', $blok . '%')
+            ->distinct()
+            ->pluck('kamar')
+            ->sort()
+            ->values()
+            ->all();
+
+        return response()->json($kamar);
+    }
+
+    public function filter(Request $request)
+    {
+        $query = WargaAsrama::query();
+
+        if ($request->filled('nama')) {
+            $query->where('nama', 'like', '%' . $request->nama . '%');
+        }
+
+        if ($request->filled('nim')) {
+            $query->where('nim', 'like', '%' . $request->nim . '%');
+        }
+
+        if ($request->filled('blok')) {
+            $query->where('kamar', 'like', $request->blok . '%');
+        }
+
+        if ($request->filled('kamar')) {
+            $query->where('kamar', $request->kamar);
+        }
+
+        if ($request->filled('angkatan')) {
+            $query->where('angkatan', $request->angkatan);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $warga = $query->orderBy('nama')->get();
+
+        // Return as JSON for AJAX
+        if ($request->wantsJson()) {
+            return response()->json([
+                'html' => view('petugas.warga.table', ['warga' => $warga])->render()
+            ]);
+        }
+
+        return view('petugas.warga.index', ['warga' => $warga]);
     }
 
     public function create()
@@ -33,52 +128,64 @@ class WargaController extends Controller
     {
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
-            'email' => 'required|email|unique:pengguna,email',
-            'password' => 'required|min:6',
-            'blok' => 'nullable|string',
-            'kamar' => 'nullable|string',
+            'nim' => 'required|string|unique:warga_asrama,nim',
+            'kamar' => 'required|string',
+            'angkatan' => 'required|integer',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
-        $validated['password'] = bcrypt($validated['password']);
-        $validated['role'] = 'warga';
-
-        Pengguna::create($validated);
+        WargaAsrama::create($validated);
 
         return redirect()->route('petugas.warga.index')->with('success', 'Warga berhasil ditambahkan.');
     }
 
+    public function show($id)
+    {
+        $warga = WargaAsrama::with(['riwayatPelanggaran', 'riwayatPenghargaan'])->findOrFail($id);
+
+        if (request()->wantsJson()) {
+            return response()->json($warga);
+        }
+
+        return view('petugas.warga.show', compact('warga'));
+    }
+
     public function edit($id)
     {
-        $warga = Pengguna::findOrFail($id);
+        $warga = WargaAsrama::findOrFail($id);
         return view('petugas.warga.edit', compact('warga'));
     }
 
     public function update(Request $request, $id)
     {
-        $warga = Pengguna::findOrFail($id);
+        $warga = WargaAsrama::findOrFail($id);
+
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
-            'email' => 'required|email|unique:pengguna,email,' . $warga->id_user . ',id_user',
-            'blok' => 'nullable|string',
-            'kamar' => 'nullable|string',
+            'nim' => 'required|string|unique:warga_asrama,nim,' . $warga->id_warga . ',id_warga',
+            'kamar' => 'required|string',
+            'angkatan' => 'required|integer',
+            'status' => 'required|in:aktif,nonaktif',
         ]);
 
         $warga->update($validated);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'warga' => $warga]);
+        }
 
         return redirect()->route('petugas.warga.index')->with('success', 'Data warga berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
-        $warga = Pengguna::findOrFail($id);
+        $warga = WargaAsrama::findOrFail($id);
         $warga->delete();
 
-        return redirect()->route('petugas.warga.index')->with('success', 'Warga berhasil dihapus.');
-    }
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
-    public function show($id)
-    {
-        $warga = Pengguna::with(['pelanggaran', 'penghargaan'])->findOrFail($id);
-        return view('petugas.warga.show', compact('warga'));
+        return redirect()->route('petugas.warga.index')->with('success', 'Warga berhasil dihapus.');
     }
 }

@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('pelanggaran', function (Blueprint $table) {
             $table->uuid('id_pelanggaran')->primary();
+            $table->uuid('id_warga');
             $table->string('nama_pelanggaran', 150);
             $table->string('kategori', 100);
             $table->integer('poin');
             $table->decimal('denda', 10, 2)->default(0);
             $table->text('deskripsi')->nullable();
             $table->timestamps();
+            $table->foreign('id_warga')->references('id_warga')->on('warga_asrama')->onDelete('cascade');
         });
     }
 

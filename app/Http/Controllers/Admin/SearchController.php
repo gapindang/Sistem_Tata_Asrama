@@ -1,9 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use App\Models\WargaAsrama;
 use Illuminate\Http\Request;
+use App\Models\Pelanggaran;
+use App\Models\Penghargaan;
+use App\Models\Denda;
+
 
 class SearchController extends Controller
 {
@@ -14,15 +19,13 @@ class SearchController extends Controller
 
     public function search(Request $request)
     {
-        $query = WargaAsrama::query();
+        $q = $request->q ?? '';
 
-        if ($request->filled('q')) {
-            $query->where('nama', 'like', '%' . $request->q . '%')
-                  ->orWhere('nim', 'like', '%' . $request->q . '%');
-        }
+        $warga = WargaAsrama::where('nama', 'like', "%$q%")->orWhere('nim', 'like', "%$q%")->get();
+        $pelanggaran = Pelanggaran::where('nama_pelanggaran', 'like', "%$q%")->get();
+        $penghargaan = Penghargaan::where('nama_penghargaan', 'like', "%$q%")->get();
+        $denda = Denda::where('nominal', 'like', "%$q%")->get();
 
-        $results = $query->get();
-
-        return view('admin.search.results', compact('results'));
+        return view('admin.search.results', compact('warga', 'pelanggaran', 'penghargaan', 'denda'));
     }
 }

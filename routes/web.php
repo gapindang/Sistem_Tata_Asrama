@@ -53,9 +53,14 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [AuthController::class, 'index'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+    Route::get('/password/forgot', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/password/email', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/password/reset/{token}', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/password/reset', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
 });
 
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -96,22 +101,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/search/results', [SearchController::class, 'search'])
                 ->name('admin.search.results');
 
-            Route::get('/warga', [WargaController::class, 'index'])
-                ->name('admin.warga.index');
-            Route::get('/warga/create', [WargaController::class, 'create'])
-                ->name('admin.warga.create');
-            Route::post('/warga', [WargaController::class, 'store'])
-                ->name('admin.warga.store');
-            Route::get('/warga/{id}/edit', [WargaController::class, 'edit'])
-                ->name('admin.warga.edit');
-            Route::put('/warga/{id}', [WargaController::class, 'update'])
-                ->name('admin.warga.update');
-            Route::delete('/warga/{id}', [WargaController::class, 'destroy'])
-                ->name('admin.warga.destroy');
-            Route::get('/warga/{id}', [WargaController::class, 'show'])
-                ->name('admin.warga.show');
-            Route::get('/warga/filter', [WargaController::class, 'filter'])
-                ->name('admin.warga.filter');
+            Route::get('/warga/filter', [WargaController::class, 'filter'])->name('admin.warga.filter');
+            Route::get('/warga', [WargaController::class, 'index'])->name('admin.warga.index');
+            Route::get('/warga/create', [WargaController::class, 'create'])->name('admin.warga.create');
+            Route::post('/warga', [WargaController::class, 'store'])->name('admin.warga.store');
+            Route::get('/warga/{id}/edit', [WargaController::class, 'edit'])->name('admin.warga.edit');
+            Route::get('/warga/{id}', [WargaController::class, 'show'])->name('admin.warga.show');
+            Route::put('/warga/{id}', [WargaController::class, 'update'])->name('admin.warga.update');
+            Route::delete('/warga/{id}', [WargaController::class, 'destroy'])->name('admin.warga.destroy');
             Route::get('/warga/{id}/riwayat', [RiwayatController::class, 'index'])
                 ->name('admin.warga.riwayat');
 
@@ -132,6 +129,8 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/penghargaan', [PenghargaanController::class, 'index'])
                 ->name('admin.penghargaan.index');
+            Route::get('/penghargaan/leaderboard', [PenghargaanController::class, 'leaderboard'])
+                ->name('admin.penghargaan.leaderboard');
             Route::get('/penghargaan/create', [PenghargaanController::class, 'create'])
                 ->name('admin.penghargaan.create');
             Route::post('/penghargaan', [PenghargaanController::class, 'store'])
@@ -149,6 +148,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/denda', [DendaController::class, 'store'])->name('admin.denda.store');
             Route::put('/denda/{id}', [DendaController::class, 'update'])->name('admin.denda.update');
             Route::delete('/denda/{id}', [DendaController::class, 'destroy'])->name('admin.denda.destroy');
+            Route::post('/denda/{id}/confirm', [DendaController::class, 'confirmPayment'])->name('admin.denda.confirm');
 
             Route::get('/kalender', [KalenderController::class, 'index'])
                 ->name('admin.kalender.index');
@@ -173,9 +173,27 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('petugas')->middleware('auth:petugas')->group(function () {
         Route::get('/dashboard', [PetugasDashboardController::class, 'index'])->name('petugas.dashboard');
-        Route::resource('/pelanggaran', PetugasPelanggaranController::class);
-        Route::resource('/warga', \App\Http\Controllers\Petugas\WargaController::class);
-        Route::resource('/penghargaan', \App\Http\Controllers\Petugas\PenghargaanController::class);
+        Route::resource('/pelanggaran', PetugasPelanggaranController::class, ['as' => 'petugas']);
+        // Notifikasi petugas
+        Route::get('/notifikasi', [\App\Http\Controllers\Petugas\NotifikasiController::class, 'index'])->name('petugas.notifikasi.index');
+        Route::get('/notifikasi/{id}/read', [\App\Http\Controllers\Petugas\NotifikasiController::class, 'markAsRead'])->name('petugas.notifikasi.read');
+        Route::delete('/notifikasi/{id}', [\App\Http\Controllers\Petugas\NotifikasiController::class, 'destroy'])->name('petugas.notifikasi.destroy');
+        // Riwayat pelanggaran (petugas) - create and store
+        Route::get('/riwayat-pelanggaran/create', [\App\Http\Controllers\Petugas\RiwayatPelanggaranController::class, 'create'])->name('petugas.riwayat.create');
+        Route::post('/riwayat-pelanggaran', [\App\Http\Controllers\Petugas\RiwayatPelanggaranController::class, 'store'])->name('petugas.riwayat.store');
+        Route::post('/riwayat-pelanggaran/{id}/done', [\App\Http\Controllers\Petugas\RiwayatPelanggaranController::class, 'markAsDone'])->name('petugas.riwayat.done');
+        Route::resource('/warga', \App\Http\Controllers\Petugas\WargaController::class, ['as' => 'petugas']);
+        Route::get('/warga/filter/kamar', [\App\Http\Controllers\Petugas\WargaController::class, 'getKamarByBlok'])->name('petugas.warga.getKamar');
+        Route::get('/denda', [\App\Http\Controllers\Petugas\DendaController::class, 'index'])->name('petugas.denda.index');
+        Route::post('/denda', [\App\Http\Controllers\Petugas\DendaController::class, 'store'])->name('petugas.denda.store');
+        Route::put('/denda/{id}', [\App\Http\Controllers\Petugas\DendaController::class, 'update'])->name('petugas.denda.update');
+        Route::delete('/denda/{id}', [\App\Http\Controllers\Petugas\DendaController::class, 'destroy'])->name('petugas.denda.destroy');
+        // Riwayat penghargaan (petugas) - award penghargaan to warga
+        Route::get('/riwayat-penghargaan', [\App\Http\Controllers\Petugas\RiwayatPenghargaanController::class, 'index'])->name('petugas.riwayat-penghargaan.index');
+        Route::get('/riwayat-penghargaan/create', [\App\Http\Controllers\Petugas\RiwayatPenghargaanController::class, 'create'])->name('petugas.riwayat-penghargaan.create');
+        Route::post('/riwayat-penghargaan', [\App\Http\Controllers\Petugas\RiwayatPenghargaanController::class, 'store'])->name('petugas.riwayat-penghargaan.store');
+        Route::delete('/riwayat-penghargaan/{id}', [\App\Http\Controllers\Petugas\RiwayatPenghargaanController::class, 'destroy'])->name('petugas.riwayat-penghargaan.destroy');
+        Route::resource('/penghargaan', \App\Http\Controllers\Petugas\PenghargaanController::class, ['as' => 'petugas']);
         Route::get('/laporan', [\App\Http\Controllers\Petugas\LaporanController::class, 'index'])->name('petugas.laporan.index');
         Route::get('/profil', [\App\Http\Controllers\Petugas\ProfilController::class, 'index'])->name('petugas.profil.index');
     });
@@ -184,11 +202,24 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('warga')->middleware('auth:warga')->group(function () {
         Route::get('/dashboard', [WargaDashboardController::class, 'index'])->name('warga.dashboard');
         Route::get('/profil', [WargaProfilController::class, 'index'])->name('warga.profil.index');
+        Route::put('/profil', [\App\Http\Controllers\Warga\ProfilController::class, 'update'])->name('warga.profil.update');
+
+        // Custom routes must come BEFORE resource routes
+        Route::get('/pelanggaran/riwayat', [\App\Http\Controllers\Warga\PelanggaranController::class, 'riwayat'])->name('warga.pelanggaran.riwayat');
+        Route::get('/denda/riwayat', [\App\Http\Controllers\Warga\DendaController::class, 'riwayat'])->name('warga.denda.riwayat');
+        Route::get('/penghargaan/riwayat', [\App\Http\Controllers\Warga\PenghargaanController::class, 'riwayat'])->name('warga.penghargaan.riwayat');
+        Route::get('/statistik', [\App\Http\Controllers\Warga\StatistikController::class, 'index'])->name('warga.statistik.index');
+        Route::get('/statistik/data', [\App\Http\Controllers\Warga\StatistikController::class, 'data'])->name('warga.statistik.data');
+        Route::get('/pesan', [\App\Http\Controllers\Warga\PesanController::class, 'index'])->name('warga.pesan.index');
+        Route::post('/pesan', [\App\Http\Controllers\Warga\PesanController::class, 'store'])->name('warga.pesan.store');
+        Route::get('/notifikasi', [\App\Http\Controllers\Warga\NotifikasiController::class, 'index'])->name('warga.notifikasi.index');
+        Route::get('/notifikasi/{id}/read', [\App\Http\Controllers\Warga\NotifikasiController::class, 'markAsRead'])->name('warga.notifikasi.read');
+        Route::delete('/notifikasi/{id}', [\App\Http\Controllers\Warga\NotifikasiController::class, 'destroy'])->name('warga.notifikasi.destroy');
+
+        // Resource routes AFTER custom routes
+        Route::resource('/warga', \App\Http\Controllers\Warga\WargaController::class);
         Route::resource('/pelanggaran', \App\Http\Controllers\Warga\PelanggaranController::class);
         Route::resource('/penghargaan', \App\Http\Controllers\Warga\PenghargaanController::class);
         Route::resource('/denda', \App\Http\Controllers\Warga\DendaController::class);
-        Route::get('/statistik', [\App\Http\Controllers\Warga\StatistikController::class, 'index'])->name('warga.statistik.index');
-        Route::get('/pesan', [\App\Http\Controllers\Warga\PesanController::class, 'index'])->name('warga.pesan.index');
-        Route::get('/notifikasi', [\App\Http\Controllers\Warga\NotifikasiController::class, 'index'])->name('warga.notifikasi.index');
     });
 });

@@ -66,4 +66,17 @@ class PenghargaanController extends Controller
         $penghargaan = Penghargaan::findOrFail($id);
         return view('admin.penghargaan.show', compact('penghargaan'));
     }
+
+    public function leaderboard()
+    {
+        $results = \App\Models\RiwayatPenghargaan::selectRaw('id_warga, SUM((select poin_reward from penghargaan where penghargaan.id_penghargaan = riwayat_penghargaan.id_penghargaan)) as total_poin')
+            ->groupBy('id_warga')
+            ->orderByDesc('total_poin')
+            ->get();
+
+        // load warga models for display
+        $results->load('warga');
+
+        return view('admin.penghargaan.leaderboard', compact('results'));
+    }
 }

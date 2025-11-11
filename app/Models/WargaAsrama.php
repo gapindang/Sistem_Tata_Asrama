@@ -15,15 +15,15 @@ class WargaAsrama extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['nama', 'nim', 'kamar', 'angkatan', 'status'];
+    protected $fillable = ['nama', 'nim', 'kamar', 'angkatan', 'status', 'id_user'];
 
     public function riwayatPelanggaran()
     {
-        return $this->hasMany(RiwayatPelanggaran::class, 'id_warga');
+        return $this->hasMany(RiwayatPelanggaran::class, 'id_warga')->with('pelanggaran');
     }
 
     public function riwayatPenghargaan()
     {
-        return $this->hasMany(RiwayatPenghargaan::class, 'id_warga');
+        return $this->hasMany(RiwayatPenghargaan::class, 'id_warga')->with('penghargaan');
     }
 }

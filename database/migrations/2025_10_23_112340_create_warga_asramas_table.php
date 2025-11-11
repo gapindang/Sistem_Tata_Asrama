@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('kamar', 20);
             $table->string('angkatan', 10);
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
-            $table->uuid('id_user')->nullable();
+            $table->uuid('id_user');
             $table->foreign('id_user')->references('id_user')->on('pengguna')->onDelete('cascade');
             $table->timestamps();
         });

@@ -15,10 +15,15 @@ class Penghargaan extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['nama_penghargaan', 'poin_reward', 'deskripsi'];
+    protected $fillable = ['nama_penghargaan', 'poin_reward', 'deskripsi', 'id_warga'];
 
     public function riwayatPenghargaan()
     {
         return $this->hasMany(RiwayatPenghargaan::class, 'id_penghargaan');
+    }
+
+    public function wargaAsrama()
+    {
+        return $this->belongsTo(WargaAsrama::class, 'id_warga');
     }
 }

@@ -15,10 +15,15 @@ class Pelanggaran extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['nama_pelanggaran', 'kategori', 'poin', 'denda', 'deskripsi'];
+    protected $fillable = ['nama_pelanggaran', 'kategori', 'poin', 'denda', 'deskripsi', 'id_warga'];
 
     public function riwayatPelanggaran()
     {
         return $this->hasMany(RiwayatPelanggaran::class, 'id_pelanggaran');
+    }
+
+    public function wargaAsrama()
+    {
+        return $this->belongsTo(WargaAsrama::class, 'id_warga');
     }
 }

@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>Login SITAMA</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
+
 <body>
     <h2>Login SITAMA</h2>
 
-    @if(session('error'))
+    @if (session('error'))
         <p style="color:red;">{{ session('error') }}</p>
     @endif
 
@@ -23,4 +25,5 @@
         <button type="submit">Login</button>
     </form>
 </body>
+
 </html>

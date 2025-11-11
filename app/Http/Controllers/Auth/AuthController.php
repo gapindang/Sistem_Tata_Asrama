@@ -52,13 +52,24 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
+        $credentials = $request->only('email', 'password');
+
         $pengguna = Pengguna::where('email', $request->email)->first();
 
-        if ($pengguna && Hash::check($request->password, $pengguna->password)) {
-            Auth::guard('web')->login($pengguna);
-            // dd(Auth::guard('web')->user());
-            return $this->redirectByRole($pengguna->role)
-                ->with('success', 'Selamat datang, ' . ucfirst($pengguna->role) . '!');
+        // if ($pengguna && Hash::check($request->password, $pengguna->password)) {
+        //     Auth::guard('web')->login($pengguna);
+        //     // dd(Auth::guard('web')->user());
+        //     return $this->redirectByRole($pengguna->role)
+        //         ->with('success', 'Selamat datang, ' . ucfirst($pengguna->role) . '!');
+        // }
+
+        if (Auth::guard('web')->attempt($credentials)) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+            // dd($user->role);
+            return $this->redirectByRole($user->role)
+                ->with('success', 'Selamat datang, ' . ucfirst($user->role) . '!');
         }
 
         return back()->with('error', 'Email atau password salah.');
