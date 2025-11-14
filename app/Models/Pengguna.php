@@ -33,6 +33,11 @@ class Pengguna extends Authenticatable
         return $this->hasMany(Pemberitahuan::class, 'id_user');
     }
 
+    public function wargaAsrama()
+    {
+        return $this->hasOne(WargaAsrama::class, 'id_user');
+    }
+
     public function getAuthIdentifierName()
     {
         return 'id_user';

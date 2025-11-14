@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class DendaController extends Controller
 {
@@ -105,6 +106,49 @@ class DendaController extends Controller
         return response()->json(['success' => true, 'denda' => $denda]);
     }
 
+    public function approve($id)
+    {
+        $denda = Denda::with('riwayatPelanggaran')->findOrFail($id);
+
+        if (!$denda->bukti_bayar) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada bukti pembayaran'], 400);
+        }
+
+        // Check if current petugas is the one who created the violation
+        $currentPetugas = Auth::user()->id_user;
+        if ($denda->riwayatPelanggaran->id_petugas !== $currentPetugas) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk approve denda ini. Hanya petugas yang mencatat pelanggaran yang dapat approve.'], 403);
+        }
+
+        $denda->update([
+            'status_bayar' => 'dibayar',
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Pembayaran denda telah disetujui']);
+    }
+
+    public function reject($id)
+    {
+        $denda = Denda::with('riwayatPelanggaran')->findOrFail($id);
+
+        // Check if current petugas is the one who created the violation
+        $currentPetugas = Auth::user()->id_user;
+        if ($denda->riwayatPelanggaran->id_petugas !== $currentPetugas) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk menolak denda ini. Hanya petugas yang mencatat pelanggaran yang dapat menolak.'], 403);
+        }
+
+        // Delete uploaded proof
+        if ($denda->bukti_bayar && Storage::disk('public')->exists($denda->bukti_bayar)) {
+            Storage::disk('public')->delete($denda->bukti_bayar);
+        }
+
+        $denda->update([
+            'bukti_bayar' => null,
+            'tanggal_bayar' => null,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Bukti pembayaran ditolak. Warga harus mengupload ulang.']);
+    }
     public function destroy($id)
     {
         $denda = Denda::findOrFail($id);

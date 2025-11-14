@@ -2,87 +2,178 @@
 @section('title', 'Data Warga Asrama')
 
 @section('content')
-    <h2 class="mb-4">👥 Data Warga Asrama</h2>
+    <div class="container-fluid py-4">
+        {{-- Header Section --}}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px;">
+                    <div class="card-body py-4">
+                        <div class="d-flex justify-content-between align-items-center text-white">
+                            <div class="d-flex align-items-center gap-3">
+                                <div
+                                    style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                                </div>
+                                <div>
+                                    <h2 class="fw-bold mb-1">Data Warga Asrama</h2>
+                                    <p class="mb-0 opacity-75">Kelola data warga asrama dengan mudah</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-light btn-lg" data-bs-toggle="modal"
+                                data-bs-target="#addModal">
+                                <i class="bi bi-plus-circle me-2"></i>Tambah Warga
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addModal">
-        + Tambah Warga
-    </button>
+        {{-- Filter Card --}}
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-funnel-fill me-2" style="color: #667eea;"></i>Filter Pencarian</h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="filterForm" class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" name="nama" class="form-control" placeholder="Cari nama...">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="nim" class="form-control" placeholder="NIM">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" name="kamar" class="form-control" placeholder="Kamar">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="angkatan" class="form-control" placeholder="Angkatan">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="aktif">Aktif</option>
+                            <option value="nonaktif">Nonaktif</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn w-100"
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-    <div class="card mb-3">
-        <div class="card-body">
-            <form id="filterForm" class="row g-3">
-                <div class="col-md-3">
-                    <input type="text" name="nama" class="form-control" placeholder="Cari nama...">
+        {{-- Table Section --}}
+        <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-table me-2" style="color: #667eea;"></i>Daftar Warga</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle mb-0">
+                        <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <tr>
+                                <th class="text-center" style="width: 5%">No</th>
+                                <th style="width: 20%">Nama</th>
+                                <th style="width: 15%">NIM</th>
+                                <th class="text-center" style="width: 10%">Kamar</th>
+                                <th class="text-center" style="width: 12%">Angkatan</th>
+                                <th class="text-center" style="width: 12%">Status</th>
+                                <th class="text-center" style="width: 26%">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wargaTableBody">
+                            @forelse ($wargas as $i => $row)
+                                <tr>
+                                    <td class="text-center fw-bold">{{ $i + 1 }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div
+                                                style="width: 35px; height: 35px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                                {{ strtoupper(substr($row->nama, 0, 1)) }}
+                                            </div>
+                                            <strong>{{ $row->nama }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>{{ $row->nim ?? '-' }}</td>
+                                    <td class="text-center">
+                                        <span
+                                            class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">{{ $row->kamar ?? '-' }}</span>
+                                    </td>
+                                    <td class="text-center">{{ $row->angkatan ?? '-' }}</td>
+                                    <td class="text-center">
+                                        @if ($row->status == 'aktif')
+                                            <span class="badge bg-success-subtle text-success px-3 py-2">
+                                                <i class="bi bi-check-circle me-1"></i>{{ ucfirst($row->status) }}
+                                            </span>
+                                        @else
+                                            <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                                                <i class="bi bi-x-circle me-1"></i>{{ ucfirst($row->status) }}
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-info btn-detail"
+                                                data-id="{{ $row->id_warga }}" title="Detail">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-warning btn-edit"
+                                                data-id="{{ $row->id_warga }}" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-delete"
+                                                data-id="{{ $row->id_warga }}" title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="mb-3">
+                                            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                        </div>
+                                        <p class="text-muted mb-0">Tidak ada data warga</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-                <div class="col-md-2">
-                    <input type="text" name="nim" class="form-control" placeholder="NIM">
-                </div>
-                <div class="col-md-2">
-                    <input type="text" name="kamar" class="form-control" placeholder="Kamar">
-                </div>
-                <div class="col-md-2">
-                    <input type="number" name="angkatan" class="form-control" placeholder="Angkatan">
-                </div>
-                <div class="col-md-2">
-                    <select name="status" class="form-select">
-                        <option value="">Semua Status</option>
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Nonaktif</option>
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <button type="submit" class="btn btn-secondary w-100">Filter</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead class="table-primary">
-                <tr>
-                    <th>No</th>
-                    <th>Nama</th>
-                    <th>NIM</th>
-                    <th>Kamar</th>
-                    <th>Angkatan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="wargaTableBody">
-                @forelse ($wargas as $i => $row)
-                    <tr>
-                        <td>{{ $i + 1 }}</td>
-                        <td>{{ $row->nama }}</td>
-                        <td>{{ $row->nim ?? '-' }}</td>
-                        <td>{{ $row->kamar ?? '-' }}</td>
-                        <td>{{ $row->angkatan ?? '-' }}</td>
-                        <td>
-                            <span class="badge bg-{{ $row->status == 'aktif' ? 'success' : 'danger' }}">
-                                {{ ucfirst($row->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-info btn-detail" data-id="{{ $row->id_warga }}">
-                                Detail
-                            </button>
-                            <button type="button" class="btn btn-sm btn-warning btn-edit" data-id="{{ $row->id_warga }}">
-                                Edit
-                            </button>
-                            <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="{{ $row->id_warga }}">
-                                Hapus
-                            </button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center">Tidak ada data warga</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <style>
+        .table-hover tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+
+        .bg-success-subtle {
+            background-color: rgba(25, 135, 84, 0.1) !important;
+        }
+
+        .bg-danger-subtle {
+            background-color: rgba(220, 53, 69, 0.1) !important;
+        }
+
+        .btn-group-sm .btn {
+            transition: all 0.2s ease;
+        }
+
+        .btn-group-sm .btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
 
     <!-- Modal Tambah -->
     <div class="modal fade" id="addModal" tabindex="-1">

@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
-                <button type="button" class="btn btn-primary btn-lg" id="btnTambahDenda" onclick="btnTambahDenda();">
+                <button type="button" class="btn btn-primary btn-lg" id="btnTambahDenda">
                     <i class="bi bi-plus-circle me-2"></i>Tambah Denda
                 </button>
             </div>
@@ -158,19 +158,29 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <button class="btn btn-outline-info"
-                                                onclick="showDendaById('{{ $item->id_denda }}')" title="Lihat Detail"
+                                            @if ($item->status_bayar == 'belum' && $item->bukti_bayar)
+                                                <button class="btn btn-outline-success btn-approve"
+                                                    data-id="{{ $item->id_denda }}" title="Approve"
+                                                    data-bs-toggle="tooltip">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-reject"
+                                                    data-id="{{ $item->id_denda }}" title="Reject"
+                                                    data-bs-toggle="tooltip">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            @endif
+                                            <button class="btn btn-outline-info btn-detail"
+                                                data-id="{{ $item->id_denda }}" title="Lihat Detail"
                                                 data-bs-toggle="tooltip">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-outline-warning"
-                                                onclick="openEditModalById('{{ $item->id_denda }}')" title="Edit"
-                                                data-bs-toggle="tooltip">
+                                            <button class="btn btn-outline-warning btn-edit"
+                                                data-id="{{ $item->id_denda }}" title="Edit" data-bs-toggle="tooltip">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger"
-                                                onclick="deleteDenda('{{ $item->id_denda }}')" title="Hapus"
-                                                data-bs-toggle="tooltip">
+                                            <button class="btn btn-outline-danger btn-delete"
+                                                data-id="{{ $item->id_denda }}" title="Hapus" data-bs-toggle="tooltip">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -652,8 +662,8 @@
                             ${isImage 
                                 ? `<img src="/storage/${data.bukti_bayar}" class="img-thumbnail" style="max-height: 80px; cursor: pointer;" onclick="window.open('/storage/${data.bukti_bayar}', '_blank')">`
                                 : `<a href="/storage/${data.bukti_bayar}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                        <i class="bi bi-file-pdf me-1"></i>Lihat PDF
-                                                       </a>`
+                                                                <i class="bi bi-file-pdf me-1"></i>Lihat PDF
+                                                               </a>`
                             }
                         </div>
                     </div>
@@ -702,6 +712,58 @@
                 .catch(error => {
                     console.error('Error:', error);
                     showAlert('❌ Terjadi kesalahan jaringan', 'error');
+                });
+        }
+
+        function approveDenda(id) {
+            if (!confirm('✅ Approve pembayaran denda ini?')) return;
+
+            fetch(`/petugas/denda/${id}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showAlert('✅ Pembayaran berhasil diapprove', 'success');
+                        setTimeout(() => location.reload(), 500);
+                    } else {
+                        showAlert('❌ ' + (result.message || 'Gagal approve'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('❌ Terjadi kesalahan', 'error');
+                });
+        }
+
+        function rejectDenda(id) {
+            if (!confirm('❌ Reject pembayaran denda ini?\n\nBukti pembayaran akan dihapus.')) return;
+
+            fetch(`/petugas/denda/${id}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showAlert('✅ Pembayaran berhasil direject', 'success');
+                        setTimeout(() => location.reload(), 500);
+                    } else {
+                        showAlert('❌ ' + (result.message || 'Gagal reject'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('❌ Terjadi kesalahan', 'error');
                 });
         }
 
@@ -837,6 +899,37 @@
                     });
                 });
             }
+
+            // Event delegation for action buttons  
+            document.body.addEventListener('click', function(e) {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                const id = target.dataset.id;
+                if (!id) return;
+
+                if (target.classList.contains('btn-detail')) {
+                    e.preventDefault();
+                    console.log('Detail button clicked for ID:', id);
+                    showDendaById(id);
+                } else if (target.classList.contains('btn-edit')) {
+                    e.preventDefault();
+                    console.log('Edit button clicked for ID:', id);
+                    openEditModalById(id);
+                } else if (target.classList.contains('btn-delete')) {
+                    e.preventDefault();
+                    console.log('Delete button clicked for ID:', id);
+                    deleteDenda(id);
+                } else if (target.classList.contains('btn-approve')) {
+                    e.preventDefault();
+                    console.log('Approve button clicked for ID:', id);
+                    approveDenda(id);
+                } else if (target.classList.contains('btn-reject')) {
+                    e.preventDefault();
+                    console.log('Reject button clicked for ID:', id);
+                    rejectDenda(id);
+                }
+            });
 
             console.log('✅ Initialization complete');
         });

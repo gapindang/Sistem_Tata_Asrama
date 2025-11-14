@@ -13,38 +13,42 @@ class ProfilController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $warga = $user->warga ?? null;
+        $warga = $user->wargaAsrama ?? null;
         return view('warga.profil.index', compact('user', 'warga'));
     }
 
     public function update(Request $request)
     {
         $user = Auth::user();
-        $warga = $user->warga ?? null;
+        $warga = $user->wargaAsrama ?? null;
 
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'email' => 'required|email|unique:pengguna,email,' . $user->id_user . ',id_user',
+            'nim' => 'required|string|max:20',
+            'kamar' => 'required|string|max:20',
+            'angkatan' => 'required|string|max:4',
             'password' => 'nullable|string|min:6|confirmed',
-            'kamar' => 'nullable|string',
-            'kontak' => 'nullable|string',
+        ]);
+
+        $pengguna = Pengguna::findOrFail($user->id_user);
+        $pengguna->update([
+            'nama' => $validated['nama'],
         ]);
 
         if (!empty($validated['password'])) {
-            $validated['password'] = bcrypt($validated['password']);
-        } else {
-            unset($validated['password']);
-        }
-
-        $pengguna = Pengguna::findOrFail($user->id_user);
-        $pengguna->update($validated);
-
-        if ($warga) {
-            $warga->update([
-                'kamar' => $validated['kamar'] ?? $warga->kamar,
+            $pengguna->update([
+                'password' => bcrypt($validated['password']),
             ]);
         }
 
-        return redirect()->route('warga.profil.index')->with('success', 'Profil diperbarui.');
+        if ($warga) {
+            $warga->update([
+                'nim' => $validated['nim'],
+                'kamar' => $validated['kamar'],
+                'angkatan' => $validated['angkatan'],
+            ]);
+        }
+
+        return redirect()->route('warga.profil.index')->with('success', 'Profil berhasil diperbarui.');
     }
 }

@@ -11,8 +11,8 @@ class PelanggaranController extends Controller
 {
     public function index()
     {
-        $pelanggaran = Pelanggaran::all();
-        return view('petugas.pelanggaran.index', compact('pelanggaran'));
+        $pelanggarans = Pelanggaran::all();
+        return view('petugas.pelanggaran.index', compact('pelanggarans'));
     }
 
     public function create()
@@ -30,7 +30,11 @@ class PelanggaranController extends Controller
             'deskripsi' => 'nullable|string',
         ]);
 
-        Pelanggaran::create($validated);
+        $pelanggaran = Pelanggaran::create($validated);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'pelanggaran' => $pelanggaran]);
+        }
 
         return redirect()->route('petugas.pelanggaran.index')->with('success', 'Data pelanggaran berhasil ditambahkan.');
     }
@@ -55,13 +59,32 @@ class PelanggaranController extends Controller
 
         $pelanggaran->update($validated);
 
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'pelanggaran' => $pelanggaran]);
+        }
+
         return redirect()->route('petugas.pelanggaran.index')->with('success', 'Data pelanggaran berhasil diperbarui.');
+    }
+
+    public function show($id)
+    {
+        $pelanggaran = Pelanggaran::findOrFail($id);
+
+        if (request()->wantsJson()) {
+            return response()->json($pelanggaran);
+        }
+
+        return view('petugas.pelanggaran.show', compact('pelanggaran'));
     }
 
     public function destroy($id)
     {
         $pelanggaran = Pelanggaran::findOrFail($id);
         $pelanggaran->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Data pelanggaran berhasil dihapus.']);
+        }
 
         return redirect()->route('petugas.pelanggaran.index')->with('success', 'Data pelanggaran berhasil dihapus.');
     }

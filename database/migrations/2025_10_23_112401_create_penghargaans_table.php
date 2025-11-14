@@ -13,13 +13,10 @@ return new class extends Migration
     {
         Schema::create('penghargaan', function (Blueprint $table) {
             $table->uuid('id_penghargaan')->primary();
-            $table->uuid('id_warga');
             $table->string('nama_penghargaan', 150);
             $table->integer('poin_reward');
             $table->text('deskripsi')->nullable();
             $table->timestamps();
-
-            $table->foreign('id_warga')->references('id_warga')->on('warga_asrama')->onDelete('cascade');
         });
     }
 

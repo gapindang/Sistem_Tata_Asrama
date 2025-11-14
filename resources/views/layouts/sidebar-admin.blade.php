@@ -1,12 +1,21 @@
 <div class="sidebar">
     <h5 class="text-center fw-bold mb-4">Admin Panel</h5>
-    <a href="#" class="menu-link" data-url="{{ route('admin.dashboard') }}">Dashboard</a>
-    <a href="#" class="menu-link" data-url="{{ route('admin.notifikasi.index') }}">Notifikasi</a>
-    <a href="#" class="menu-link" data-url="{{ route('admin.warga.index') }}">Data Warga</a>
-    <a href="#" class="menu-link" data-url="{{ route('admin.pelanggaran.index') }}">Pelanggaran</a>
-    <a href="#" class="menu-link" data-url="{{ route('admin.penghargaan.index') }}">Penghargaan</a>
-    <a href="#" class="menu-link" data-url="{{ route('admin.denda.index') }}">Denda</a>
-    <a href="#" class="menu-link" data-url="{{ route('admin.kalender.index') }}">Kalender</a>
-    <a href="#" class="menu-link" data-url="{{ route('admin.laporan.index') }}">Laporan</a>
-    <a href="#" class="menu-link" data-url="{{ route('admin.pengaturan.index') }}">Pengaturan</a>
+    <a href="{{ route('admin.dashboard') }}"
+        class="{{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
+    <a href="{{ route('admin.notifikasi.index') }}"
+        class="{{ Request::routeIs('admin.notifikasi.*') ? 'active' : '' }}">Notifikasi</a>
+    <a href="{{ route('admin.warga.index') }}" class="{{ Request::routeIs('admin.warga.*') ? 'active' : '' }}">Data
+        Warga</a>
+    <a href="{{ route('admin.pelanggaran.index') }}"
+        class="{{ Request::routeIs('admin.pelanggaran.*') ? 'active' : '' }}">Pelanggaran</a>
+    <a href="{{ route('admin.penghargaan.index') }}"
+        class="{{ Request::routeIs('admin.penghargaan.*') ? 'active' : '' }}">Penghargaan</a>
+    <a href="{{ route('admin.denda.index') }}"
+        class="{{ Request::routeIs('admin.denda.*') ? 'active' : '' }}">Denda</a>
+    <a href="{{ route('admin.kalender.index') }}"
+        class="{{ Request::routeIs('admin.kalender.*') ? 'active' : '' }}">Kalender</a>
+    <a href="{{ route('admin.laporan.index') }}"
+        class="{{ Request::routeIs('admin.laporan.*') ? 'active' : '' }}">Laporan</a>
+    <a href="{{ route('admin.pengaturan.index') }}"
+        class="{{ Request::routeIs('admin.pengaturan.*') ? 'active' : '' }}">Pengaturan</a>
 </div>

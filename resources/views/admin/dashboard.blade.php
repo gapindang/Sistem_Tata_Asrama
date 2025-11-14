@@ -7,66 +7,82 @@
     <div class="container-fluid py-4">
         {{-- Header --}}
         <div class="row mb-4">
-            <div class="col-md-8">
-                <h2 class="fw-bold mb-1">📊 Dashboard Admin</h2>
-                <p class="text-muted">Ringkasan statistik sistem asrama</p>
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px;">
+                    <div class="card-body py-4">
+                        <div class="d-flex align-items-center gap-3 text-white">
+                            <div
+                                style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-speedometer2" style="font-size: 2rem;"></i>
+                            </div>
+                            <div>
+                                <h2 class="fw-bold mb-1">Dashboard Admin</h2>
+                                <p class="mb-0 opacity-75">Ringkasan statistik sistem asrama</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         {{-- Key Statistics Cards --}}
         <div class="row mb-4 g-3">
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm stat-card" style="border-left: 4px solid #667eea;">
+                <div class="card border-0 shadow-sm stat-card" style="border-radius: 15px; overflow: hidden;">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted small mb-1">Total Pelanggaran</p>
-                                <h3 class="fw-bold mb-0">{{ $data['totalPelanggaran'] }}</h3>
-                            </div>
-                            <div style="font-size: 2rem; color: #667eea;"><i class="bi bi-exclamation-circle-fill"></i>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-exclamation-circle-fill text-white" style="font-size: 1.5rem;"></i>
                             </div>
                         </div>
+                        <p class="text-muted small mb-1">Total Pelanggaran</p>
+                        <h3 class="fw-bold mb-0" style="color: #667eea;">{{ $data['totalPelanggaran'] }}</h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm stat-card" style="border-left: 4px solid #43e97b;">
+                <div class="card border-0 shadow-sm stat-card" style="border-radius: 15px; overflow: hidden;">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted small mb-1">Total Penghargaan</p>
-                                <h3 class="fw-bold mb-0">{{ $data['totalPenghargaan'] }}</h3>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-award-fill text-white" style="font-size: 1.5rem;"></i>
                             </div>
-                            <div style="font-size: 2rem; color: #43e97b;"><i class="bi bi-award-fill"></i></div>
                         </div>
+                        <p class="text-muted small mb-1">Total Penghargaan</p>
+                        <h3 class="fw-bold mb-0" style="color: #43e97b;">{{ $data['totalPenghargaan'] }}</h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm stat-card" style="border-left: 4px solid #f093fb;">
+                <div class="card border-0 shadow-sm stat-card" style="border-radius: 15px; overflow: hidden;">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted small mb-1">Total Denda</p>
-                                <h3 class="fw-bold mb-0" style="font-size: 1.3rem;">Rp
-                                    {{ number_format($data['totalDenda'], 0, ',', '.') }}</h3>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-cash-coin text-white" style="font-size: 1.5rem;"></i>
                             </div>
-                            <div style="font-size: 2rem; color: #f093fb;"><i class="bi bi-cash-coin"></i></div>
                         </div>
+                        <p class="text-muted small mb-1">Total Denda</p>
+                        <h3 class="fw-bold mb-0" style="font-size: 1.3rem; color: #f093fb;">Rp
+                            {{ number_format($data['totalDenda'], 0, ',', '.') }}</h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm stat-card" style="border-left: 4px solid #4facfe;">
+                <div class="card border-0 shadow-sm stat-card" style="border-radius: 15px; overflow: hidden;">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <p class="text-muted small mb-1">Denda Terbayar</p>
-                                <h3 class="fw-bold mb-0" style="font-size: 1.3rem;">Rp
-                                    {{ number_format($data['totalDendaBayar'], 0, ',', '.') }}</h3>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-check-circle-fill text-white" style="font-size: 1.5rem;"></i>
                             </div>
-                            <div style="font-size: 2rem; color: #4facfe;"><i class="bi bi-check-circle-fill"></i></div>
                         </div>
+                        <p class="text-muted small mb-1">Denda Terbayar</p>
+                        <h3 class="fw-bold mb-0" style="font-size: 1.3rem; color: #fa709a;">Rp
+                            {{ number_format($data['totalDendaBayar'], 0, ',', '.') }}</h3>
                     </div>
                 </div>
             </div>
@@ -145,11 +161,20 @@
     <style>
         .stat-card {
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
         }
     </style>
 
