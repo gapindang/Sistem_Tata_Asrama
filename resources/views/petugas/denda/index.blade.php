@@ -373,6 +373,31 @@
         .table-hover tbody tr:hover {
             background-color: rgba(102, 126, 234, 0.05);
         }
+
+        /* Ensure modals appear above backdrop with correct z-index */
+        .modal-backdrop {
+            z-index: 1040;
+        }
+
+        .modal {
+            z-index: 1050;
+        }
+
+        /* Center modal dialog properly */
+        .modal-dialog {
+            margin: 1.75rem auto;
+        }
+
+        /* Ensure modal is responsive */
+        @media (min-width: 576px) {
+            .modal-dialog {
+                max-width: 500px;
+            }
+
+            .modal-dialog-lg {
+                max-width: 800px;
+            }
+        }
     </style>
 @endsection
 
@@ -523,14 +548,24 @@
                     selectRiwayat.disabled = false;
                 }
 
-                // Show modal
+                // Show modal with proper Bootstrap 5 method
                 const modalElement = document.getElementById('modalDenda');
                 if (modalElement) {
                     console.log('✅ Modal element found, showing modal...');
-                    currentModal = new bootstrap.Modal(modalElement);
+
+                    // Get or create modal instance
+                    let modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if (!modalInstance) {
+                        modalInstance = new bootstrap.Modal(modalElement);
+                    }
+
+                    currentModal = modalInstance;
                     currentModal.show();
+
+                    console.log('✅ Modal shown successfully');
                 } else {
                     console.error('❌ Modal element not found!');
+                    alert('Error: Modal tidak ditemukan!');
                 }
             } catch (error) {
                 console.error('❌ Error in btnTambahDenda:', error);
@@ -625,7 +660,12 @@
                 </div>
             `;
 
-            new bootstrap.Modal(document.getElementById('modalDendaDetail')).show();
+            const modalElement = document.getElementById('modalDendaDetail');
+            let modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (!modalInstance) {
+                modalInstance = new bootstrap.Modal(modalElement);
+            }
+            modalInstance.show();
         }
 
         function openEditModalById(id) {
@@ -662,8 +702,8 @@
                             ${isImage 
                                 ? `<img src="/storage/${data.bukti_bayar}" class="img-thumbnail" style="max-height: 80px; cursor: pointer;" onclick="window.open('/storage/${data.bukti_bayar}', '_blank')">`
                                 : `<a href="/storage/${data.bukti_bayar}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                                <i class="bi bi-file-pdf me-1"></i>Lihat PDF
-                                                               </a>`
+                                                                        <i class="bi bi-file-pdf me-1"></i>Lihat PDF
+                                                                       </a>`
                             }
                         </div>
                     </div>
@@ -672,7 +712,12 @@
                 preview.innerHTML = '';
             }
 
-            currentModal = new bootstrap.Modal(document.getElementById('modalDenda'));
+            const modalElement = document.getElementById('modalDenda');
+            let modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (!modalInstance) {
+                modalInstance = new bootstrap.Modal(modalElement);
+            }
+            currentModal = modalInstance;
             currentModal.show();
         }
 
