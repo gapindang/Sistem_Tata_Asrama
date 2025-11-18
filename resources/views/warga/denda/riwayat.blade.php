@@ -424,6 +424,35 @@
             <p>Informasi lengkap tentang denda dan status pembayaran</p>
         </div>
 
+        <!-- Alert Messages -->
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         @if ($riwayat->isEmpty())
             <div class="empty-state">
                 <i class="bi bi-emoji-smile"></i>
@@ -524,14 +553,34 @@
                     @if ($denda->status_bayar == 'dibayar' && $denda->bukti_bayar)
                         <div class="payment-proof">
                             <div class="payment-proof-title">
-                                <i class="bi bi-file-earmark-check"></i> Bukti Pembayaran
+                                <i class="bi bi-file-earmark-check"></i> Bukti Pembayaran (Terverifikasi)
                             </div>
                             <img src="{{ asset('storage/' . $denda->bukti_bayar) }}" alt="Bukti Pembayaran"
                                 class="payment-proof-image">
                         </div>
                     @endif
 
-                    @if ($denda->status_bayar == 'belum')
+                    @if ($denda->status_bayar == 'belum' && $denda->bukti_bayar)
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-clock-history me-2"></i>
+                            <strong>Menunggu Verifikasi</strong>
+                            <p class="mb-2 mt-2">Bukti pembayaran Anda sudah diupload dan sedang menunggu verifikasi dari
+                                petugas.</p>
+                            <div class="payment-proof mt-2">
+                                <div class="payment-proof-title">
+                                    <i class="bi bi-file-earmark-text"></i> Bukti yang Diupload
+                                </div>
+                                <img src="{{ asset('storage/' . $denda->bukti_bayar) }}" alt="Bukti Pembayaran"
+                                    class="payment-proof-image" style="max-width: 300px;">
+                                <p class="text-muted small mt-2">
+                                    <i class="bi bi-calendar3"></i> Diupload:
+                                    {{ \Carbon\Carbon::parse($denda->tanggal_bayar)->format('d F Y, H:i') }}
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($denda->status_bayar == 'belum' && !$denda->bukti_bayar)
                         <form action="{{ route('warga.denda.upload', $denda->id_denda) }}" method="POST"
                             enctype="multipart/form-data" class="mt-3">
                             @csrf
@@ -540,9 +589,31 @@
                                     <h6 class="card-title"><i class="bi bi-upload"></i> Upload Bukti Pembayaran</h6>
                                     <p class="text-muted small mb-3">Silakan upload bukti transfer pembayaran denda (JPG,
                                         PNG, PDF - Max 2MB)</p>
+
+                                    @if ($errors->any())
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            <i class="bi bi-exclamation-triangle me-2"></i>
+                                            <strong>Error!</strong>
+                                            <ul class="mb-0 mt-2">
+                                                @foreach ($errors->all() as $error)
+                                                    <li>{{ $error }}</li>
+                                                @endforeach
+                                            </ul>
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                    @endif
+
                                     <div class="mb-3">
-                                        <input type="file" class="form-control" name="bukti_bayar" accept="image/*,.pdf"
-                                            required>
+                                        <input type="file"
+                                            class="form-control @error('bukti_bayar') is-invalid @enderror"
+                                            name="bukti_bayar" accept="image/*,.pdf" required
+                                            onchange="validateFileSize(this)">
+                                        @error('bukti_bayar')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="form-text text-muted d-block mt-1">
+                                            <i class="bi bi-info-circle"></i> Ukuran file maksimal 2MB
+                                        </small>
                                     </div>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-cloud-upload"></i> Upload Bukti Pembayaran
@@ -550,6 +621,34 @@
                                 </div>
                             </div>
                         </form>
+
+                        <script>
+                            function validateFileSize(input) {
+                                if (input.files && input.files[0]) {
+                                    const fileSize = input.files[0].size / 1024 / 1024; // in MB
+                                    if (fileSize > 2) {
+                                        alert('⚠️ Ukuran file terlalu besar!\n\nFile yang Anda pilih berukuran ' + fileSize.toFixed(2) +
+                                            ' MB.\nMaksimal ukuran file adalah 2 MB.\n\nSilakan pilih file yang lebih kecil.');
+                                        input.value = ''; // Clear the file input
+                                        return false;
+                                    }
+                                    // Show file name and size
+                                    const fileName = input.files[0].name;
+                                    const fileInfo = document.createElement('div');
+                                    fileInfo.className = 'alert alert-info mt-2 mb-0';
+                                    fileInfo.innerHTML = '<i class="bi bi-file-earmark-check"></i> File dipilih: <strong>' + fileName +
+                                        '</strong> (' + fileSize.toFixed(2) + ' MB)';
+
+                                    // Remove previous file info if exists
+                                    const existingInfo = input.parentElement.querySelector('.alert-info');
+                                    if (existingInfo) {
+                                        existingInfo.remove();
+                                    }
+
+                                    input.parentElement.appendChild(fileInfo);
+                                }
+                            }
+                        </script>
                         <div class="alert alert-warning mt-3 mb-0">
                             <i class="bi bi-info-circle"></i> <strong>Segera lakukan pembayaran</strong> untuk menghindari
                             sanksi lebih lanjut.

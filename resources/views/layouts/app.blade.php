@@ -32,7 +32,7 @@
             color: white;
             padding-top: 70px;
             transition: transform 0.3s ease-in-out;
-            z-index: 1040;
+            z-index: 1000;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
         }
@@ -75,7 +75,7 @@
         }
 
         .navbar {
-            z-index: 1050;
+            z-index: 1020;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -84,7 +84,7 @@
             position: fixed;
             top: 10px;
             left: 10px;
-            z-index: 1051 !important;
+            z-index: 1030 !important;
             background: #0d6efd;
             border: none;
             color: white;
@@ -116,7 +116,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1039;
+            z-index: 999;
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
             pointer-events: none;
@@ -128,15 +128,14 @@
             pointer-events: auto !important;
         }
 
+        /* Remove z-index stacking context on .content so Bootstrap modals inside it can sit above the backdrop.
+           Having z-index:1 here was forcing all child modals behind the global backdrop appended to <body>. */
         .content {
-            position: relative;
-            z-index: 1;
+            position: static;
+            /* was relative */
         }
 
-        .content>* {
-            position: relative;
-            z-index: auto;
-        }
+        /* Child elements no longer need forced stacking context settings */
 
         @media (max-width: 768px) {
             .sidebar {
@@ -207,6 +206,10 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         $(document).ready(function() {

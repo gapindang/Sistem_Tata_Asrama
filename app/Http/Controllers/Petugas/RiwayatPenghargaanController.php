@@ -45,7 +45,6 @@ class RiwayatPenghargaanController extends Controller
 
         $riwayat->load(['warga', 'penghargaan']);
 
-        // Send email notification
         if ($riwayat->warga && $riwayat->warga->user && $riwayat->warga->user->email) {
             try {
                 Mail::to($riwayat->warga->user->email)->send(new PenghargaanNotification($riwayat));

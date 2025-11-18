@@ -17,11 +17,17 @@ class DendaController extends Controller
 {
     public function index()
     {
+        $currentPetugas = Auth::user()->id_user;
+
         $denda = Denda::with(['riwayatPelanggaran.pelanggaran', 'riwayatPelanggaran.warga'])
+            ->whereHas('riwayatPelanggaran', function ($q) use ($currentPetugas) {
+                $q->where('id_petugas', $currentPetugas);
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
         $allRiwayat = RiwayatPelanggaran::with(['pelanggaran', 'warga', 'denda'])
+            ->where('id_petugas', $currentPetugas)
             ->orderBy('tanggal', 'desc')
             ->get();
 
@@ -36,27 +42,27 @@ class DendaController extends Controller
         $request->validate([
             'id_riwayat_pelanggaran' => 'required|string|exists:riwayat_pelanggaran,id_riwayat_pelanggaran',
             'nominal' => 'required|numeric|min:0',
-            'bukti_bayar' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        $data = [
-            'id_riwayat_pelanggaran' => $request->id_riwayat_pelanggaran,
-            'nominal' => $request->nominal,
-            'status_bayar' => $request->input('status_bayar', 'belum'),
-        ];
+        $currentPetugas = Auth::user()->id_user;
 
-        if ($request->hasFile('bukti_bayar')) {
-            $file = $request->file('bukti_bayar');
-            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('bukti_denda', $filename, 'public');
-            $data['bukti_bayar'] = $path;
+        $riwayat = RiwayatPelanggaran::with('denda')
+            ->where('id_riwayat_pelanggaran', $request->id_riwayat_pelanggaran)
+            ->where('id_petugas', $currentPetugas)
+            ->firstOrFail();
+
+        if ($riwayat->denda) {
+            return response()->json(['success' => false, 'message' => 'Riwayat ini sudah memiliki denda'], 422);
         }
 
-        $denda = Denda::create($data);
+        $denda = Denda::create([
+            'id_riwayat_pelanggaran' => $riwayat->id_riwayat_pelanggaran,
+            'nominal' => $request->nominal,
+            'status_bayar' => 'belum',
+        ]);
 
         $denda->load(['riwayatPelanggaran.pelanggaran', 'riwayatPelanggaran.warga']);
 
-        // Send email notification
         if ($denda->riwayatPelanggaran && $denda->riwayatPelanggaran->warga) {
             try {
                 $warga = $denda->riwayatPelanggaran->warga;
@@ -73,34 +79,23 @@ class DendaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $denda = Denda::findOrFail($id);
+        $denda = Denda::with('riwayatPelanggaran')->findOrFail($id);
 
-        $request->validate([
-            'nominal' => 'required|numeric|min:0',
-            'status_bayar' => 'required|in:belum,dibayar',
-            'tanggal_bayar' => 'nullable|date',
-            'bukti_bayar' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        ]);
-
-        $data = [
-            'nominal' => $request->nominal,
-            'status_bayar' => $request->status_bayar,
-            'tanggal_bayar' => $request->tanggal_bayar,
-        ];
-
-        if ($request->hasFile('bukti_bayar')) {
-            // Delete old file if exists
-            if ($denda->bukti_bayar && Storage::disk('public')->exists($denda->bukti_bayar)) {
-                Storage::disk('public')->delete($denda->bukti_bayar);
-            }
-
-            $file = $request->file('bukti_bayar');
-            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('bukti_denda', $filename, 'public');
-            $data['bukti_bayar'] = $path;
+        $currentPetugas = Auth::user()->id_user;
+        if (!$denda->riwayatPelanggaran || $denda->riwayatPelanggaran->id_petugas !== $currentPetugas) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk mengubah denda ini'], 403);
         }
 
-        $denda->update($data);
+        $request->validate([
+            'status_bayar' => 'required|in:belum,dibayar',
+        ]);
+
+        $update = [
+            'status_bayar' => $request->status_bayar,
+            'tanggal_bayar' => $request->status_bayar === 'dibayar' ? now() : null,
+        ];
+
+        $denda->update($update);
         $denda->load(['riwayatPelanggaran.pelanggaran', 'riwayatPelanggaran.warga']);
 
         return response()->json(['success' => true, 'denda' => $denda]);
@@ -114,7 +109,6 @@ class DendaController extends Controller
             return response()->json(['success' => false, 'message' => 'Tidak ada bukti pembayaran'], 400);
         }
 
-        // Check if current petugas is the one who created the violation
         $currentPetugas = Auth::user()->id_user;
         if ($denda->riwayatPelanggaran->id_petugas !== $currentPetugas) {
             return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk approve denda ini. Hanya petugas yang mencatat pelanggaran yang dapat approve.'], 403);
@@ -122,6 +116,7 @@ class DendaController extends Controller
 
         $denda->update([
             'status_bayar' => 'dibayar',
+            'tanggal_bayar' => now(),
         ]);
 
         return response()->json(['success' => true, 'message' => 'Pembayaran denda telah disetujui']);
@@ -131,13 +126,11 @@ class DendaController extends Controller
     {
         $denda = Denda::with('riwayatPelanggaran')->findOrFail($id);
 
-        // Check if current petugas is the one who created the violation
         $currentPetugas = Auth::user()->id_user;
         if ($denda->riwayatPelanggaran->id_petugas !== $currentPetugas) {
             return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk menolak denda ini. Hanya petugas yang mencatat pelanggaran yang dapat menolak.'], 403);
         }
 
-        // Delete uploaded proof
         if ($denda->bukti_bayar && Storage::disk('public')->exists($denda->bukti_bayar)) {
             Storage::disk('public')->delete($denda->bukti_bayar);
         }
@@ -151,9 +144,13 @@ class DendaController extends Controller
     }
     public function destroy($id)
     {
-        $denda = Denda::findOrFail($id);
+        $denda = Denda::with('riwayatPelanggaran')->findOrFail($id);
 
-        // Delete file if exists
+        $currentPetugas = Auth::user()->id_user;
+        if (!$denda->riwayatPelanggaran || $denda->riwayatPelanggaran->id_petugas !== $currentPetugas) {
+            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki akses untuk menghapus denda ini'], 403);
+        }
+
         if ($denda->bukti_bayar && Storage::disk('public')->exists($denda->bukti_bayar)) {
             Storage::disk('public')->delete($denda->bukti_bayar);
         }

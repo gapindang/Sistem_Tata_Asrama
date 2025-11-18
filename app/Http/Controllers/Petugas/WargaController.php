@@ -38,7 +38,6 @@ class WargaController extends Controller
 
         $warga = $query->orderBy('nama')->paginate(20);
 
-        // Get unique blok and kamar for filter dropdowns
         $bloks = WargaAsrama::distinct()
             ->pluck('kamar')
             ->map(function ($kamar) {
@@ -109,7 +108,6 @@ class WargaController extends Controller
 
         $warga = $query->orderBy('nama')->get();
 
-        // Return as JSON for AJAX
         if ($request->wantsJson()) {
             return response()->json([
                 'html' => view('petugas.warga.table', ['warga' => $warga])->render()

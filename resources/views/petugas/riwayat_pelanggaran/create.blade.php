@@ -56,8 +56,8 @@
                         </h5>
                     </div>
                     <div class="card-body p-4">
-                        <form method="POST" action="{{ route('petugas.riwayat.store') }}" enctype="multipart/form-data"
-                            id="formPelanggaran">
+                        <form method="POST" action="{{ route('petugas.riwayat_pelanggaran.store') }}"
+                            enctype="multipart/form-data" id="formPelanggaran">
                             @csrf
 
                             <div class="mb-4">
@@ -197,7 +197,6 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Warga selection change
             $('#selectWarga').on('change', function() {
                 const selectedOption = $(this).find('option:selected');
                 const nama = selectedOption.data('nama');
@@ -215,7 +214,6 @@
                 }
             });
 
-            // Pelanggaran selection change
             $('#selectPelanggaran').on('change', function() {
                 const selectedOption = $(this).find('option:selected');
                 const poin = selectedOption.data('poin');
@@ -230,7 +228,6 @@
                 }
             });
 
-            // File input preview
             $('#inputBukti').on('change', function(e) {
                 const file = e.target.files[0];
                 const preview = $('#buktiPreview');
@@ -278,7 +275,6 @@
                 }
             });
 
-            // Form validation before submit
             $('#formPelanggaran').on('submit', function(e) {
                 const warga = $('#selectWarga').val();
                 const pelanggaran = $('#selectPelanggaran').val();
@@ -286,7 +282,7 @@
 
                 if (!warga || !pelanggaran || !tanggal) {
                     e.preventDefault();
-                    alert('❌ Mohon lengkapi semua field yang wajib diisi!');
+                    alert('Mohon lengkapi semua field yang wajib diisi!');
                     return false;
                 }
 

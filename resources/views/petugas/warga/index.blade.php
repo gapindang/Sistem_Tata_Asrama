@@ -184,16 +184,15 @@
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
                                             <button class="btn btn-outline-info btn-detail"
-                                                data-id="{{ $row->id_warga }}" title="Lihat Detail"
-                                                data-bs-toggle="tooltip">
+                                                data-id="{{ $row->id_warga }}" title="Lihat Detail">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             <button class="btn btn-outline-warning btn-edit"
-                                                data-id="{{ $row->id_warga }}" title="Edit" data-bs-toggle="tooltip">
+                                                data-id="{{ $row->id_warga }}" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button class="btn btn-outline-danger btn-delete"
-                                                data-id="{{ $row->id_warga }}" title="Hapus" data-bs-toggle="tooltip">
+                                                data-id="{{ $row->id_warga }}" title="Hapus">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -334,60 +333,36 @@
 
 @push('scripts')
     <script>
-        let currentEditId = null;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-
-            // Cascading dropdown: Blok -> Kamar
+        document.addEventListener('DOMContentLoaded', () => {
             const blokSelect = document.getElementById('filterBlok');
             const kamarSelect = document.getElementById('filterKamar');
+            const editForm = document.getElementById('formEdit');
 
-            if (blokSelect) {
+            if (blokSelect && kamarSelect) {
                 blokSelect.addEventListener('change', function() {
                     const blok = this.value;
                     kamarSelect.innerHTML = '<option value="">-- Semua Kamar --</option>';
                     kamarSelect.disabled = !blok;
-
-                    if (blok) {
-                        fetch(`{{ route('petugas.warga.getKamar') }}?blok=${blok}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                data.forEach(kamar => {
-                                    const option = document.createElement('option');
-                                    option.value = kamar;
-                                    option.textContent = kamar;
-                                    kamarSelect.appendChild(option);
-                                });
-                            })
-                            .catch(error => console.error('Error:', error));
-                    }
+                    if (!blok) return;
+                    fetch(`{{ route('petugas.warga.getKamar') }}?blok=${blok}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            data.forEach(kamar => {
+                                const opt = document.createElement('option');
+                                opt.value = kamar;
+                                opt.textContent = kamar;
+                                kamarSelect.appendChild(opt);
+                            });
+                        })
+                        .catch(err => console.error('Error load kamar:', err));
                 });
             }
 
-            // Form submit
-            const filterForm = document.getElementById('filterForm');
-            if (filterForm) {
-                filterForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    this.submit(); // Allow normal form submission
-                });
-            }
-
-            // Edit form submit
-            const editForm = document.getElementById('formEdit');
             if (editForm) {
-                editForm.addEventListener('submit', function(e) {
+                editForm.addEventListener('submit', e => {
                     e.preventDefault();
-
-                    const formData = new FormData(this);
                     const id = document.getElementById('editId').value;
                     const url = `{{ route('petugas.warga.update', ':id') }}`.replace(':id', id);
-
                     fetch(url, {
                             method: 'POST',
                             headers: {
@@ -395,23 +370,37 @@
                                     .getAttribute('content'),
                                 'Accept': 'application/json'
                             },
-                            body: formData
+                            body: new FormData(editForm)
                         })
-                        .then(response => response.json())
+                        .then(r => r.json())
                         .then(result => {
                             if (result.success) {
-                                bootstrap.Modal.getInstance(document.getElementById('modalEdit'))
-                                    .hide();
-                                showAlert('✅ Data warga berhasil diperbarui', 'success');
-                                setTimeout(() => location.reload(), 1000);
+                                const modal = bootstrap.Modal.getInstance(document.getElementById(
+                                    'modalEdit'));
+                                if (modal) modal.hide();
+                                showAlert('Data warga berhasil diperbarui', 'success');
+                                setTimeout(() => location.reload(), 800);
+                            } else {
+                                showAlert('Gagal menyimpan data', 'error');
                             }
                         })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showAlert('❌ Gagal menyimpan data', 'error');
+                        .catch(err => {
+                            console.error('Error save:', err);
+                            showAlert('Gagal menyimpan data', 'error');
                         });
                 });
             }
+
+            document.addEventListener('click', e => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+                const id = btn.dataset.id;
+                if (!id) return;
+                e.preventDefault();
+                if (btn.classList.contains('btn-detail')) return showDetail(id);
+                if (btn.classList.contains('btn-edit')) return editWarga(id);
+                if (btn.classList.contains('btn-delete')) return deleteWarga(id);
+            });
         });
 
         function showDetail(id) {
@@ -479,11 +468,13 @@
                     </div>
                 `;
 
-                    new bootstrap.Modal(document.getElementById('modalDetail')).show();
+                    const modalElement = document.getElementById('modalDetail');
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modalInstance.show();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('❌ Gagal memuat data', 'error');
+                    showAlert('Gagal memuat data', 'error');
                 });
         }
 
@@ -505,16 +496,18 @@
                     const form = document.getElementById('formEdit');
                     form.action = `{{ route('petugas.warga.update', ':id') }}`.replace(':id', id);
 
-                    new bootstrap.Modal(document.getElementById('modalEdit')).show();
+                    const modalElement = document.getElementById('modalEdit');
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modalInstance.show();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('❌ Gagal memuat data', 'error');
+                    showAlert('Gagal memuat data', 'error');
                 });
         }
 
         function deleteWarga(id) {
-            if (!confirm('⚠️ Apakah Anda yakin ingin menghapus warga ini?')) return;
+            if (!confirm('Apakah Anda yakin ingin menghapus warga ini?')) return;
 
             fetch(`{{ route('petugas.warga.destroy', ':id') }}`.replace(':id', id), {
                     method: 'DELETE',
@@ -532,14 +525,14 @@
                             row.style.opacity = '0';
                             setTimeout(() => {
                                 row.remove();
-                                showAlert('✅ Warga berhasil dihapus', 'success');
+                                showAlert('Warga berhasil dihapus', 'success');
                             }, 300);
                         }
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('❌ Gagal menghapus warga', 'error');
+                    showAlert('Gagal menghapus warga', 'error');
                 });
         }
 
@@ -556,33 +549,5 @@
             tempDiv.innerHTML = alertHtml;
             container.insertBefore(tempDiv.firstElementChild, container.firstChild);
         }
-
-        // Event delegation for action buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            document.addEventListener('click', function(e) {
-                const target = e.target.closest('button');
-                if (!target) return;
-
-                const id = target.dataset.id;
-                if (!id) return;
-
-                if (target.classList.contains('btn-detail')) {
-                    e.preventDefault();
-                    showDetail(id);
-                } else if (target.classList.contains('btn-edit')) {
-                    e.preventDefault();
-                    editWarga(id);
-                } else if (target.classList.contains('btn-delete')) {
-                    e.preventDefault();
-                    deleteWarga(id);
-                }
-            });
-
-            // Initialize tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            });
-        });
     </script>
 @endpush

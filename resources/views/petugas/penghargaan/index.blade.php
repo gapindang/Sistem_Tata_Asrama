@@ -244,13 +244,11 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            // Search functionality
             $('#searchPenghargaan').on('keyup', function() {
                 const searchValue = $(this).val().toLowerCase();
 
@@ -266,7 +264,6 @@
                 });
             });
 
-            // Detail button click
             $('.btn-detail').on('click', function() {
                 const nama = $(this).data('nama');
                 const deskripsi = $(this).data('deskripsi');
