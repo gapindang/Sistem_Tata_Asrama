@@ -22,9 +22,19 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li>
-                                <a class="dropdown-item" href="#">
-                                    <i class="bi bi-person me-2"></i>Profil
-                                </a>
+                                @if (Auth::user()->role === 'admin')
+                                    <a class="dropdown-item" href="{{ route('admin.profil.index') }}">
+                                        <i class="bi bi-person me-2"></i>Profil
+                                    </a>
+                                @elseif(Auth::user()->role === 'petugas')
+                                    <a class="dropdown-item" href="{{ route('petugas.profil.index') }}">
+                                        <i class="bi bi-person me-2"></i>Profil
+                                    </a>
+                                @elseif(Auth::user()->role === 'warga')
+                                    <a class="dropdown-item" href="{{ route('warga.profil.index') }}">
+                                        <i class="bi bi-person me-2"></i>Profil
+                                    </a>
+                                @endif
                             </li>
                             <li>
                                 <hr class="dropdown-divider">

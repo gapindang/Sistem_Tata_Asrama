@@ -194,7 +194,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/riwayat-penghargaan/{id}', [\App\Http\Controllers\Petugas\RiwayatPenghargaanController::class, 'destroy'])->name('petugas.riwayat-penghargaan.destroy');
         Route::resource('/penghargaan', \App\Http\Controllers\Petugas\PenghargaanController::class, ['as' => 'petugas']);
         Route::get('/laporan', [\App\Http\Controllers\Petugas\LaporanController::class, 'index'])->name('petugas.laporan.index');
+        Route::get('/laporan/export', [\App\Http\Controllers\Petugas\LaporanController::class, 'export'])->name('petugas.laporan.export');
         Route::get('/profil', [\App\Http\Controllers\Petugas\ProfilController::class, 'index'])->name('petugas.profil.index');
+        Route::put('/profil', [\App\Http\Controllers\Petugas\ProfilController::class, 'update'])->name('petugas.profil.update');
     });
 
 

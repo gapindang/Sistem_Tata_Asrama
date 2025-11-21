@@ -647,8 +647,8 @@
                             ${isImage 
                                 ? `<img src="/storage/${data.bukti_bayar}" class="img-thumbnail" style="max-height: 80px; cursor: pointer;" onclick="window.open('/storage/${data.bukti_bayar}', '_blank')">`
                                 : `<a href="/storage/${data.bukti_bayar}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                                                                                                <i class="bi bi-file-pdf me-1"></i>Lihat PDF
-                                                                                                                               </a>`
+                                                                                                                                    <i class="bi bi-file-pdf me-1"></i>Lihat PDF
+                                                                                                                                   </a>`
                             }
                         </div>
                     </div>
@@ -792,10 +792,13 @@
             if (modalElement) {
                 console.log('Modal element found');
 
+                // Reset modal only when explicitly opened for "add" mode
+                // The edit mode is handled by openEditModalById() function
                 modalElement.addEventListener('show.bs.modal', function(event) {
-                    const button = event.relatedTarget;
-                    if (!button || !button.classList.contains('btn-edit')) {
-                        isEdit = false;
+                    // If modal is opened via openEditModalById(), isEdit will be true
+                    // Don't reset the form in that case
+                    if (!isEdit) {
+                        // This is "add" mode
                         document.getElementById('modalTitle').innerHTML =
                             '<i class="bi bi-plus-circle me-2"></i>Tambah Denda';
                         document.getElementById('formDenda').reset();

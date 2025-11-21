@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-gradient-primary text-white">
+                    <div class="card-header bg-gradient-success text-white">
                         <h4 class="mb-0"><i class="bi bi-file-earmark-text"></i> Laporan & Ekspor Data</h4>
                     </div>
                     <div class="card-body">
@@ -24,7 +24,7 @@
                             </div>
                         @endif
 
-                        <form action="{{ route('admin.laporan.export') }}" method="GET" id="exportForm">
+                        <form action="{{ route('petugas.laporan.export') }}" method="GET" id="exportForm">
                             <div class="row g-3">
                                 <!-- Pilih Jenis Laporan -->
                                 <div class="col-md-6">
@@ -33,9 +33,7 @@
                                     </label>
                                     <select name="type" class="form-select" required>
                                         <option value="">-- Pilih Jenis Laporan --</option>
-                                        <option value="pelanggaran">Master Pelanggaran</option>
                                         <option value="riwayat_pelanggaran">Riwayat Pelanggaran</option>
-                                        <option value="penghargaan">Master Penghargaan</option>
                                         <option value="riwayat_penghargaan">Riwayat Penghargaan</option>
                                         <option value="denda">Laporan Denda</option>
                                     </select>
@@ -105,7 +103,7 @@
 
                                 <!-- Submit Button -->
                                 <div class="col-12">
-                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <button type="submit" class="btn btn-success btn-lg w-100">
                                         <i class="bi bi-download me-2"></i> Download Laporan
                                     </button>
                                 </div>
@@ -132,8 +130,8 @@
     </div>
 
     <style>
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
     </style>
 
