@@ -49,11 +49,16 @@ class RegisterController extends Controller
                 ->subject('Kode OTP Verifikasi Akun');
         });
 
-        return redirect()->route('auth.verify-otp')->with('email', $request->email);
+        return redirect()->route('auth.verify-otp');
     }
 
     public function verifyForm()
     {
+        // Redirect ke register jika session OTP tidak ada
+        if (!session('otp_email')) {
+            return redirect()->route('register')->withErrors(['email' => 'Silakan daftar terlebih dahulu.']);
+        }
+
         return view('auth.verify-otp');
     }
 
@@ -84,23 +89,32 @@ class RegisterController extends Controller
 
     public function resendOtp(Request $request)
     {
-        $lastSent = session('otp_last_sent');
-
-        if ($lastSent && Carbon::parse($lastSent)->diffInSeconds(Carbon::now()) < 15) {
-            $remaining = 15 - Carbon::parse($lastSent)->diffInSeconds(Carbon::now());
-            return back()->withErrors(['otp' => "Tunggu $remaining detik sebelum mengirim ulang OTP."]);
-        }
-
         $email = session('otp_email');
         if (!$email) {
             return redirect()->route('register')->withErrors(['email' => 'Sesi OTP tidak ditemukan. Silakan daftar ulang.']);
         }
 
+        $lastSent = session('otp_last_sent');
+
+        if ($lastSent && Carbon::parse($lastSent)->diffInSeconds(Carbon::now()) < 60) {
+            $remaining = 60 - Carbon::parse($lastSent)->diffInSeconds(Carbon::now());
+            return back()->withErrors(['otp' => "Tunggu $remaining detik sebelum mengirim ulang OTP."]);
+        }
+
         $otp = rand(100000, 999999);
+        $expiresAt = Carbon::now()->addMinutes(5);
+
+        // Update OTP di database juga
+        $pengguna = Pengguna::where('email', $email)->first();
+        if ($pengguna) {
+            $pengguna->otp_code = $otp;
+            $pengguna->otp_expires_at = $expiresAt;
+            $pengguna->save();
+        }
 
         session([
             'otp' => $otp,
-            'otp_expires_at' => Carbon::now()->addMinutes(5),
+            'otp_expires_at' => $expiresAt,
             'otp_last_sent' => Carbon::now(),
         ]);
 

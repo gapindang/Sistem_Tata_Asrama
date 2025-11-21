@@ -275,7 +275,7 @@
                         <span class="input-group-text">
                             <i class="bi bi-envelope"></i>
                         </span>
-                        <input type="email" name="email" class="form-control" value="{{ session('email') }}"
+                        <input type="email" name="email" class="form-control" value="{{ session('otp_email') }}"
                             readonly>
                     </div>
                 </div>
@@ -299,6 +299,7 @@
 
             <form method="POST" action="{{ route('auth.resend-otp') }}" id="resendForm">
                 @csrf
+                <input type="hidden" name="email" value="{{ session('otp_email') }}">
                 <button type="submit" class="btn-resend" id="resendBtn">
                     <i class="bi bi-arrow-repeat"></i> Kirim Ulang OTP
                 </button>
@@ -315,25 +316,50 @@
 
     <script>
         // Countdown timer for resend OTP
-        let countdownSeconds = 60;
         let countdownInterval;
         const resendBtn = document.getElementById('resendBtn');
         const countdownDiv = document.getElementById('countdown');
 
-        function startCountdown() {
-            resendBtn.disabled = true;
-            countdownSeconds = 60;
-
-            countdownInterval = setInterval(() => {
-                countdownSeconds--;
-                countdownDiv.textContent = `Kirim ulang tersedia dalam ${countdownSeconds} detik`;
-
-                if (countdownSeconds <= 0) {
-                    clearInterval(countdownInterval);
-                    resendBtn.disabled = false;
-                    countdownDiv.textContent = '';
+        function calculateRemainingTime() {
+            @php
+                $lastSent = session('otp_last_sent');
+                $remainingSeconds = 0;
+                if ($lastSent) {
+                    $elapsed = \Carbon\Carbon::parse($lastSent)->diffInSeconds(\Carbon\Carbon::now());
+                    $remainingSeconds = (int) max(0, 60 - $elapsed);
                 }
-            }, 1000);
+            @endphp
+            return {{ $remainingSeconds }};
+        }
+
+        function startCountdown() {
+            let countdownSeconds = calculateRemainingTime();
+
+            if (countdownSeconds > 0) {
+                resendBtn.disabled = true;
+
+                // Clear any existing interval
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+
+                countdownInterval = setInterval(() => {
+                    countdownSeconds--;
+                    countdownDiv.textContent = `Kirim ulang tersedia dalam ${Math.floor(countdownSeconds)} detik`;
+
+                    if (countdownSeconds <= 0) {
+                        clearInterval(countdownInterval);
+                        resendBtn.disabled = false;
+                        countdownDiv.textContent = '';
+                    }
+                }, 1000);
+
+                // Set initial text
+                countdownDiv.textContent = `Kirim ulang tersedia dalam ${Math.floor(countdownSeconds)} detik`;
+            } else {
+                resendBtn.disabled = false;
+                countdownDiv.textContent = '';
+            }
         }
 
         // Start countdown on page load
@@ -341,10 +367,11 @@
             startCountdown();
         });
 
-        // Restart countdown when resend button is clicked
+        // Handle form submission
         document.getElementById('resendForm').addEventListener('submit', (e) => {
-            if (!resendBtn.disabled) {
-                startCountdown();
+            if (resendBtn.disabled) {
+                e.preventDefault();
+                return false;
             }
         });
 

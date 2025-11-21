@@ -14,6 +14,37 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 @auth
+                    {{-- Notification Bell --}}
+                    <li class="nav-item me-3">
+                        @php
+                            $user = Auth::user();
+                            $unreadCount = 0;
+
+                            if ($user->role === 'petugas') {
+                                $unreadCount = \App\Models\Pemberitahuan::where('id_user', $user->id_user)
+                                    ->where('status_baca', 0)
+                                    ->count();
+                            } elseif ($user->role === 'admin') {
+                                $unreadCount = \App\Models\Pemberitahuan::where('id_user', $user->id_user)
+                                    ->where('status_baca', 0)
+                                    ->count();
+                            } elseif ($user->role === 'warga') {
+                                $unreadCount = \App\Models\Pemberitahuan::where('id_user', $user->id_user)
+                                    ->where('status_baca', 0)
+                                    ->count();
+                            }
+                        @endphp
+
+                        <a href="@if ($user->role === 'petugas') {{ route('petugas.notifikasi.index') }}@elseif($user->role === 'admin'){{ route('admin.notifikasi.index') }}@else{{ route('warga.notifikasi.index') }} @endif"
+                            class="nav-link position-relative d-flex align-items-center notification-bell"
+                            title="Notifikasi">
+                            <i class="bi bi-bell-fill" style="font-size: 20px;"></i>
+                            @if ($unreadCount > 0)
+                                <span class="badge-notif">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
+                            @endif
+                        </a>
+                    </li>
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -100,6 +131,32 @@
         padding-left: 25px;
     }
 
+    /* Notification Bell Styles */
+    .notification-bell {
+        position: relative;
+        transition: transform 0.2s ease;
+    }
+
+    .notification-bell:hover {
+        transform: scale(1.1);
+    }
+
+    .badge-notif {
+        position: absolute;
+        top: -5px;
+        right: -10px;
+        background-color: #dc3545;
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 10px;
+        min-width: 18px;
+        text-align: center;
+        line-height: 1.2;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
     @media (max-width: 768px) {
         .navbar-brand span {
             font-size: 18px;
@@ -115,6 +172,14 @@
             border-radius: 10px;
             margin-top: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification-bell {
+            padding-left: 0.5rem;
+        }
+
+        .badge-notif {
+            right: -5px;
         }
     }
 </style>

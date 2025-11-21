@@ -160,8 +160,14 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/pengaturan', [PengaturanController::class, 'index'])
                 ->name('admin.pengaturan.index');
-            Route::post('/pengaturan/update', [PengaturanController::class, 'update'])
+            Route::put('/pengaturan/update', [PengaturanController::class, 'update'])
                 ->name('admin.pengaturan.update');
+            Route::post('/pengaturan/kategori', [PengaturanController::class, 'storeKategori'])
+                ->name('admin.pengaturan.kategori.store');
+            Route::put('/pengaturan/kategori', [PengaturanController::class, 'updateKategori'])
+                ->name('admin.pengaturan.kategori.update');
+            Route::delete('/pengaturan/kategori/{id}', [PengaturanController::class, 'deleteKategori'])
+                ->name('admin.pengaturan.kategori.delete');
 
             Route::get('/petugas', [PetugasController::class, 'index'])->name('admin.petugas.index');
             Route::get('/petugas/create', [PetugasController::class, 'create'])->name('admin.petugas.create');
@@ -169,6 +175,17 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/petugas/{id}/edit', [PetugasController::class, 'edit'])->name('admin.petugas.edit');
             Route::put('/petugas/{id}', [PetugasController::class, 'update'])->name('admin.petugas.update');
             Route::delete('/petugas/{id}', [PetugasController::class, 'destroy'])->name('admin.petugas.destroy');
+
+            Route::get('/profil', [\App\Http\Controllers\Admin\ProfilController::class, 'index'])->name('admin.profil.index');
+            Route::put('/profil', [\App\Http\Controllers\Admin\ProfilController::class, 'update'])->name('admin.profil.update');
+
+            Route::get('/berita', [\App\Http\Controllers\Admin\BeritaController::class, 'index'])->name('admin.berita.index');
+            Route::get('/berita/create', [\App\Http\Controllers\Admin\BeritaController::class, 'create'])->name('admin.berita.create');
+            Route::post('/berita', [\App\Http\Controllers\Admin\BeritaController::class, 'store'])->name('admin.berita.store');
+            Route::get('/berita/{id}', [\App\Http\Controllers\Admin\BeritaController::class, 'show'])->name('admin.berita.show');
+            Route::get('/berita/{id}/edit', [\App\Http\Controllers\Admin\BeritaController::class, 'edit'])->name('admin.berita.edit');
+            Route::put('/berita/{id}', [\App\Http\Controllers\Admin\BeritaController::class, 'update'])->name('admin.berita.update');
+            Route::delete('/berita/{id}', [\App\Http\Controllers\Admin\BeritaController::class, 'destroy'])->name('admin.berita.destroy');
         });
 
     Route::prefix('petugas')->middleware('auth:petugas')->group(function () {

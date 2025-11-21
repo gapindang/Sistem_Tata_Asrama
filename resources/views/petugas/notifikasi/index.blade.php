@@ -4,12 +4,12 @@
 
     <style>
         .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             border-radius: 15px;
             padding: 30px;
             color: white;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 30px rgba(17, 153, 142, 0.3);
         }
 
         .page-header h2 {
@@ -37,12 +37,12 @@
         .notif-card:hover {
             transform: translateX(5px);
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
-            border-left-color: #667eea;
+            border-left-color: #11998e;
         }
 
         .notif-card.unread {
-            background: #f0f4ff;
-            border-left-color: #667eea;
+            background: #f0fff9;
+            border-left-color: #11998e;
         }
 
         .notif-icon {
@@ -58,7 +58,7 @@
         }
 
         .notif-icon.info {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
         }
 
@@ -149,7 +149,7 @@
         }
 
         .filter-tabs .btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
             border-color: transparent;
         }
@@ -356,15 +356,10 @@
         <div class="filter-tabs">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn active">Semua</button>
-                    <button type="button" class="btn">Belum Dibaca</button>
-                    <button type="button" class="btn">Sudah Dibaca</button>
+                    <button type="button" class="btn active">Semua ({{ $totalCount }})</button>
+                    <button type="button" class="btn">Belum Dibaca ({{ $unreadCount }})</button>
+                    <button type="button" class="btn">Sudah Dibaca ({{ $readCount }})</button>
                 </div>
-                <button class="btn btn-outline-primary">
-                    <i class="bi bi-check-all d-none d-md-inline"></i>
-                    <span class="d-none d-md-inline">Tandai Semua Dibaca</span>
-                    <span class="d-inline d-md-none">Tandai Semua</span>
-                </button>
             </div>
         </div>
 
@@ -421,7 +416,7 @@
                             <div class="notif-message">
                                 @if ($isBerita)
                                     {{ Str::limit($beritaIsi, 100) }}
-                                    <span class="text-primary fw-semibold">Klik untuk lihat detail...</span>
+                                    <span class="text-success fw-semibold">Klik untuk lihat detail...</span>
                                 @else
                                     {{ $notif->pesan }}
                                 @endif
@@ -438,12 +433,12 @@
                     @if (!$isBerita)
                         <div class="d-flex gap-2 mt-3">
                             @if (!$notif->status_baca)
-                                <a href="{{ route('warga.notifikasi.read', $notif->id_notifikasi) }}"
-                                    class="btn btn-sm btn-primary">
+                                <a href="{{ route('petugas.notifikasi.read', $notif->id_notifikasi) }}"
+                                    class="btn btn-sm btn-success">
                                     <i class="bi bi-check me-1"></i>Tandai Dibaca
                                 </a>
                             @endif
-                            <form action="{{ route('warga.notifikasi.destroy', $notif->id_notifikasi) }}" method="POST"
+                            <form action="{{ route('petugas.notifikasi.destroy', $notif->id_notifikasi) }}" method="POST"
                                 style="display: inline;">
                                 @csrf
                                 @method('DELETE')
@@ -470,7 +465,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content" style="border-radius: 15px; border: none;">
                 <div class="modal-header"
-                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
+                    style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-radius: 15px 15px 0 0;">
                     <h5 class="modal-title fw-bold" id="beritaModalLabel">
                         <i class="bi bi-newspaper me-2"></i><span id="modalTitle"></span>
                     </h5>
@@ -511,11 +506,11 @@
                 const filterText = this.textContent.trim();
                 notifCards.forEach(card => {
                     const status = card.getAttribute('data-status');
-                    if (filterText === 'Semua') {
+                    if (filterText.includes('Semua')) {
                         card.style.display = 'block';
-                    } else if (filterText === 'Belum Dibaca' && status === 'unread') {
+                    } else if (filterText.includes('Belum Dibaca') && status === 'unread') {
                         card.style.display = 'block';
-                    } else if (filterText === 'Sudah Dibaca' && status === 'read') {
+                    } else if (filterText.includes('Sudah Dibaca') && status === 'read') {
                         card.style.display = 'block';
                     } else {
                         card.style.display = 'none';
