@@ -99,7 +99,7 @@
         }
 
         .sidebar-toggle:hover {
-            background: #5f19d9ff;
+            background: #662accff;
             transform: scale(1.05);
         }
 
