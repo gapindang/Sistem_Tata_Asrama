@@ -20,7 +20,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            background-color: #0d6efd;
+            background-color: #8250f7ff;
             color: white;
             padding-top: 60px;
         }
