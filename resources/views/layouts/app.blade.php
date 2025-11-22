@@ -85,7 +85,7 @@
             top: 10px;
             left: 10px;
             z-index: 1030 !important;
-            background: #0d6efd;
+            background: #910dfdff;
             border: none;
             color: white;
             width: 45px;
@@ -99,7 +99,7 @@
         }
 
         .sidebar-toggle:hover {
-            background: #0a58ca;
+            background: #5f19d9ff;
             transform: scale(1.05);
         }
 
