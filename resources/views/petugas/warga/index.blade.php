@@ -4,15 +4,20 @@
     <div class="container-fluid py-4">
         {{-- Header Section --}}
         <div class="row mb-4">
-            <div class="col-md-8">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="bg-gradient"
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                        <i class="bi bi-people text-white" style="font-size: 24px;"></i>
-                    </div>
-                    <div>
-                        <h1 class="fw-bold mb-1">Data Warga Asrama</h1>
-                        <p class="text-muted mb-0">Kelola informasi warga asrama dengan mudah</p>
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px;">
+                    <div class="card-body py-4">
+                        <div class="d-flex align-items-center gap-3 text-white">
+                            <div
+                                style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                            </div>
+                            <div>
+                                <h2 class="fw-bold mb-1">Data Warga Asrama</h2>
+                                <p class="mb-0 opacity-75">Lihat dan cari data warga asrama</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -21,34 +26,38 @@
         {{-- Statistics Cards --}}
         <div class="row mb-4 g-3">
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 stat-card" style="border-left: 4px solid #667eea;">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
+                <div class="card border-0 shadow-sm stat-card" style="border-radius: 15px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-circle" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
                             <div>
-                                <p class="text-muted small mb-1">Total Warga</p>
+                                <p class="text-muted mb-1 small">Total Warga</p>
                                 <h3 class="fw-bold mb-0">{{ \App\Models\WargaAsrama::count() }}</h3>
                             </div>
-                            <div style="font-size: 2rem; color: #667eea;"><i class="bi bi-people-fill"></i></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 stat-card" style="border-left: 4px solid #43e97b;">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
+                <div class="card border-0 shadow-sm stat-card" style="border-radius: 15px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-circle" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
                             <div>
-                                <p class="text-muted small mb-1">Warga Aktif</p>
+                                <p class="text-muted mb-1 small">Warga Aktif</p>
                                 <h3 class="fw-bold mb-0">{{ \App\Models\WargaAsrama::where('status', 'aktif')->count() }}
                                 </h3>
                             </div>
-                            <div style="font-size: 2rem; color: #43e97b;"><i class="bi bi-check-circle-fill"></i></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100 stat-card" style="border-left: 4px solid #f093fb;">
+                <div class="card border-0 shadow-sm stat-card" style="border-radius: 15px;">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -174,19 +183,16 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <button class="btn btn-outline-info"
-                                                onclick="showDetail('{{ $row->id_warga }}')" title="Lihat Detail"
-                                                data-bs-toggle="tooltip">
+                                            <button class="btn btn-outline-info btn-detail"
+                                                data-id="{{ $row->id_warga }}" title="Lihat Detail">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-outline-warning"
-                                                onclick="editWarga('{{ $row->id_warga }}')" title="Edit"
-                                                data-bs-toggle="tooltip">
+                                            <button class="btn btn-outline-warning btn-edit"
+                                                data-id="{{ $row->id_warga }}" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger"
-                                                onclick="deleteWarga('{{ $row->id_warga }}')" title="Hapus"
-                                                data-bs-toggle="tooltip">
+                                            <button class="btn btn-outline-danger btn-delete"
+                                                data-id="{{ $row->id_warga }}" title="Hapus">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -327,60 +333,36 @@
 
 @push('scripts')
     <script>
-        let currentEditId = null;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-
-            // Cascading dropdown: Blok -> Kamar
+        document.addEventListener('DOMContentLoaded', () => {
             const blokSelect = document.getElementById('filterBlok');
             const kamarSelect = document.getElementById('filterKamar');
+            const editForm = document.getElementById('formEdit');
 
-            if (blokSelect) {
+            if (blokSelect && kamarSelect) {
                 blokSelect.addEventListener('change', function() {
                     const blok = this.value;
                     kamarSelect.innerHTML = '<option value="">-- Semua Kamar --</option>';
                     kamarSelect.disabled = !blok;
-
-                    if (blok) {
-                        fetch(`{{ route('petugas.warga.getKamar') }}?blok=${blok}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                data.forEach(kamar => {
-                                    const option = document.createElement('option');
-                                    option.value = kamar;
-                                    option.textContent = kamar;
-                                    kamarSelect.appendChild(option);
-                                });
-                            })
-                            .catch(error => console.error('Error:', error));
-                    }
+                    if (!blok) return;
+                    fetch(`{{ route('petugas.warga.getKamar') }}?blok=${blok}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            data.forEach(kamar => {
+                                const opt = document.createElement('option');
+                                opt.value = kamar;
+                                opt.textContent = kamar;
+                                kamarSelect.appendChild(opt);
+                            });
+                        })
+                        .catch(err => console.error('Error load kamar:', err));
                 });
             }
 
-            // Form submit
-            const filterForm = document.getElementById('filterForm');
-            if (filterForm) {
-                filterForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    this.submit(); // Allow normal form submission
-                });
-            }
-
-            // Edit form submit
-            const editForm = document.getElementById('formEdit');
             if (editForm) {
-                editForm.addEventListener('submit', function(e) {
+                editForm.addEventListener('submit', e => {
                     e.preventDefault();
-
-                    const formData = new FormData(this);
                     const id = document.getElementById('editId').value;
                     const url = `{{ route('petugas.warga.update', ':id') }}`.replace(':id', id);
-
                     fetch(url, {
                             method: 'POST',
                             headers: {
@@ -388,23 +370,37 @@
                                     .getAttribute('content'),
                                 'Accept': 'application/json'
                             },
-                            body: formData
+                            body: new FormData(editForm)
                         })
-                        .then(response => response.json())
+                        .then(r => r.json())
                         .then(result => {
                             if (result.success) {
-                                bootstrap.Modal.getInstance(document.getElementById('modalEdit'))
-                            .hide();
-                                showAlert('✅ Data warga berhasil diperbarui', 'success');
-                                setTimeout(() => location.reload(), 1000);
+                                const modal = bootstrap.Modal.getInstance(document.getElementById(
+                                    'modalEdit'));
+                                if (modal) modal.hide();
+                                showAlert('Data warga berhasil diperbarui', 'success');
+                                setTimeout(() => location.reload(), 800);
+                            } else {
+                                showAlert('Gagal menyimpan data', 'error');
                             }
                         })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showAlert('❌ Gagal menyimpan data', 'error');
+                        .catch(err => {
+                            console.error('Error save:', err);
+                            showAlert('Gagal menyimpan data', 'error');
                         });
                 });
             }
+
+            document.addEventListener('click', e => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+                const id = btn.dataset.id;
+                if (!id) return;
+                e.preventDefault();
+                if (btn.classList.contains('btn-detail')) return showDetail(id);
+                if (btn.classList.contains('btn-edit')) return editWarga(id);
+                if (btn.classList.contains('btn-delete')) return deleteWarga(id);
+            });
         });
 
         function showDetail(id) {
@@ -472,11 +468,13 @@
                     </div>
                 `;
 
-                    new bootstrap.Modal(document.getElementById('modalDetail')).show();
+                    const modalElement = document.getElementById('modalDetail');
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modalInstance.show();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('❌ Gagal memuat data', 'error');
+                    showAlert('Gagal memuat data', 'error');
                 });
         }
 
@@ -498,16 +496,18 @@
                     const form = document.getElementById('formEdit');
                     form.action = `{{ route('petugas.warga.update', ':id') }}`.replace(':id', id);
 
-                    new bootstrap.Modal(document.getElementById('modalEdit')).show();
+                    const modalElement = document.getElementById('modalEdit');
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modalInstance.show();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('❌ Gagal memuat data', 'error');
+                    showAlert('Gagal memuat data', 'error');
                 });
         }
 
         function deleteWarga(id) {
-            if (!confirm('⚠️ Apakah Anda yakin ingin menghapus warga ini?')) return;
+            if (!confirm('Apakah Anda yakin ingin menghapus warga ini?')) return;
 
             fetch(`{{ route('petugas.warga.destroy', ':id') }}`.replace(':id', id), {
                     method: 'DELETE',
@@ -525,14 +525,14 @@
                             row.style.opacity = '0';
                             setTimeout(() => {
                                 row.remove();
-                                showAlert('✅ Warga berhasil dihapus', 'success');
+                                showAlert('Warga berhasil dihapus', 'success');
                             }, 300);
                         }
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    showAlert('❌ Gagal menghapus warga', 'error');
+                    showAlert('Gagal menghapus warga', 'error');
                 });
         }
 

@@ -17,6 +17,11 @@ class WargaAsrama extends Model
 
     protected $fillable = ['nama', 'nim', 'kamar', 'angkatan', 'status', 'id_user'];
 
+    public function user()
+    {
+        return $this->belongsTo(Pengguna::class, 'id_user', 'id_user');
+    }
+
     public function riwayatPelanggaran()
     {
         return $this->hasMany(RiwayatPelanggaran::class, 'id_warga')->with('pelanggaran');

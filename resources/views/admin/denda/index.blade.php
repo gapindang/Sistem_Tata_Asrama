@@ -3,100 +3,129 @@
 @section('content')
     <div class="container py-4">
         {{-- Header --}}
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0">Kelola Denda</h3>
-            <!-- Call initialization function first; do not use Bootstrap's data-bs auto-toggle -->
-            <button type="button" class="btn btn-primary" id="btnTambahDenda" onclick="btnTambahDenda();">
-                <i class="bi bi-plus-circle me-1"></i> Tambah Denda
-            </button>
-            <!-- Fallback for injected content: ensure click always calls btnTambahDenda -->
-            <script>
-                (function() {
-                    const btn = document.getElementById('btnTambahDenda');
-                    if (!btn) return;
-                    // Ensure handler exists even if DOMContentLoaded didn't run for injected HTML
-                    btn.addEventListener('click', function(e) {
-                        try {
-                            if (typeof btnTambahDenda === 'function') {
-                                // btnTambahDenda will show the modal via bootstrap.Modal
-                                btnTambahDenda();
-                            }
-                        } catch (err) {
-                            console.error('btnTambahDenda fallback error:', err);
-                        }
-                    });
-                })();
-            </script>
-        </div>
-
-        {{-- Table --}}
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="text-center" style="width: 5%">No</th>
-                                <th style="width: 20%">Pelanggaran</th>
-                                <th style="width: 15%">Warga</th>
-                                <th class="text-end" style="width: 15%">Nominal</th>
-                                <th class="text-center" style="width: 12%">Status</th>
-                                <th class="text-center" style="width: 13%">Tanggal Bayar</th>
-                                <th class="text-center" style="width: 20%">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableDenda">
-                            @forelse ($denda as $index => $item)
-                                <tr id="row{{ $item->id_denda }}">
-                                    <td class="text-center col-index">{{ $index + 1 }}</td>
-                                    <td>{{ $item->riwayatPelanggaran?->pelanggaran?->nama_pelanggaran ?? '-' }}</td>
-                                    <td>{{ $item->riwayatPelanggaran?->warga?->nama ?? '-' }}</td>
-                                    <td class="text-end">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td>
-                                    <td class="text-center">
-                                        <span
-                                            class="badge bg-{{ $item->status_bayar == 'dibayar' ? 'success' : 'warning' }}">
-                                            {{ ucfirst($item->status_bayar == 'dibayar' ? 'Dibayar' : 'Belum Dibayar') }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        {{ $item->tanggal_bayar ? \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') : '-' }}
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <button class="btn btn-info" onclick="showDendaById('{{ $item->id_denda }}')"
-                                                title="Lihat Detail">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
-                                            <button class="btn btn-warning"
-                                                onclick="openEditModalById('{{ $item->id_denda }}')" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button class="btn btn-danger" onclick="deleteDenda('{{ $item->id_denda }}')"
-                                                title="Hapus">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                        @if ($item->status_bayar == 'belum')
-                                            <button class="btn btn-sm btn-success mt-1 w-100"
-                                                onclick="confirmPayment('{{ $item->id_denda }}')">
-                                                <i class="bi bi-check-circle me-1"></i> Konfirmasi
-                                            </button>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">
-                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                        Belum ada data denda
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+        <div class="card border-0 shadow-sm mb-4"
+            style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 15px;">
+            <div class="card-body py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3 text-white">
+                        <div
+                            style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-cash-coin" style="font-size: 2rem;"></i>
+                        </div>
+                        <div>
+                            <h2 class="fw-bold mb-1">Kelola Denda</h2>
+                            <p class="mb-0 opacity-75">Manajemen denda dan pembayaran</p>
+                        </div>
+                    </div>
+                    <!-- Call initialization function first; do not use Bootstrap's data-bs auto-toggle -->
+                    <button type="button" class="btn btn-light btn-lg shadow-sm" id="btnTambahDenda"
+                        onclick="btnTambahDenda();">
+                        <i class="bi bi-plus-circle me-2"></i>Tambah Denda
+                    </button>
                 </div>
             </div>
         </div>
+        <!-- Fallback for injected content: ensure click always calls btnTambahDenda -->
+        <script>
+            (function() {
+                const btn = document.getElementById('btnTambahDenda');
+                if (!btn) return;
+                // Ensure handler exists even if DOMContentLoaded didn't run for injected HTML
+                btn.addEventListener('click', function(e) {
+                    try {
+                        if (typeof btnTambahDenda === 'function') {
+                            // btnTambahDenda will show the modal via bootstrap.Modal
+                            btnTambahDenda();
+                        }
+                    } catch (err) {
+                        console.error('btnTambahDenda fallback error:', err);
+                    }
+                });
+            })();
+        </script>
+    </div>
+
+    {{-- Table --}}
+    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+        <div class="card-header bg-white border-bottom py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-table me-2" style="color: #fa709a;"></i>Daftar Denda
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                        <tr>
+                            <th class="text-center" style="width: 5%">No</th>
+                            <th style="width: 20%">Pelanggaran</th>
+                            <th style="width: 15%">Warga</th>
+                            <th class="text-end" style="width: 15%">Nominal</th>
+                            <th class="text-center" style="width: 12%">Status</th>
+                            <th class="text-center" style="width: 13%">Tanggal Bayar</th>
+                            <th class="text-center" style="width: 20%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableDenda">
+                        @forelse ($denda as $index => $item)
+                            <tr id="row{{ $item->id_denda }}">
+                                <td class="text-center col-index">{{ $index + 1 }}</td>
+                                <td>{{ $item->riwayatPelanggaran?->pelanggaran?->nama_pelanggaran ?? '-' }}</td>
+                                <td>{{ $item->riwayatPelanggaran?->warga?->nama ?? '-' }}</td>
+                                <td class="text-end">Rp {{ number_format($item->nominal, 0, ',', '.') }}</td>
+                                <td class="text-center">
+                                    @if ($item->status_bayar == 'dibayar')
+                                        <span class="badge bg-success-subtle text-success border border-success"
+                                            style="padding: 8px 12px;">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Dibayar
+                                        </span>
+                                    @else
+                                        <span class="badge bg-warning-subtle text-warning border border-warning"
+                                            style="padding: 8px 12px;">
+                                            <i class="bi bi-clock-fill me-1"></i>Belum Dibayar
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    {{ $item->tanggal_bayar ? \Carbon\Carbon::parse($item->tanggal_bayar)->format('d/m/Y') : '-' }}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-info"
+                                            onclick="showDendaById('{{ $item->id_denda }}')" title="Lihat Detail">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-warning"
+                                            onclick="openEditModalById('{{ $item->id_denda }}')" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger"
+                                            onclick="deleteDenda('{{ $item->id_denda }}')" title="Hapus">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                    @if ($item->status_bayar == 'belum')
+                                        <button class="btn btn-sm mt-1 w-100"
+                                            style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none;"
+                                            onclick="confirmPayment('{{ $item->id_denda }}')">
+                                            <i class="bi bi-check-circle me-1"></i>Konfirmasi
+                                        </button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                    Belum ada data denda
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     </div>
 
     {{-- Modal Detail --}}
@@ -129,8 +158,9 @@
             <div class="modal-content">
                 <form id="formDenda" enctype="multipart/form-data">
                     @csrf
-                    <div class="modal-header bg-light">
-                        <h5 class="modal-title" id="modalTitle">
+                    <div class="modal-header"
+                        style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title fw-bold" id="modalTitle">
                             <i class="bi bi-plus-circle me-2"></i>Tambah Denda
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -448,8 +478,8 @@
                             ${isImage 
                                 ? `<img src="/storage/${data.bukti_bayar}" class="img-thumbnail" style="max-height: 80px; cursor: pointer;" onclick="window.open('/storage/${data.bukti_bayar}', '_blank')">`
                                 : `<a href="/storage/${data.bukti_bayar}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                    <i class="bi bi-file-pdf me-1"></i>Lihat PDF
-                                                   </a>`
+                                                        <i class="bi bi-file-pdf me-1"></i>Lihat PDF
+                                                       </a>`
                             }
                         </div>
                     </div>

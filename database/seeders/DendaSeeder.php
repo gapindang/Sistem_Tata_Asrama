@@ -11,21 +11,33 @@ class DendaSeeder extends Seeder
 {
     public function run(): void
     {
-        $pelanggaran = RiwayatPelanggaran::first() ?? RiwayatPelanggaran::create([
-            'id_riwayat_pelanggaran' => (string) Str::uuid(),
-            'id_warga' => 'dummy-warga-id',
-            'id_petugas' => 'dummy-petugas-id',
-            'id_pelanggaran' => 'dummy-pelanggaran-id',
-            'tanggal' => now(),
-        ]);
+        $riwayatPelanggarans = RiwayatPelanggaran::with('pelanggaran')->get();
 
-        // Buat denda berdasarkan riwayat pelanggaran dummy
-        Denda::create([
-            'id_denda' => (string) Str::uuid(),
-            'id_riwayat_pelanggaran' => $pelanggaran->id_riwayat_pelanggaran,
-            'nominal' => 50000,
-            'status_bayar' => 'belum',
-            'tanggal_bayar' => null,
-        ]);
+        if ($riwayatPelanggarans->isEmpty()) {
+            $this->command->warn('⚠️ Data riwayat pelanggaran belum ada, seeder dilewati.');
+            return;
+        }
+
+        $statusOptions = ['belum', 'dibayar'];
+
+        // Create fines for each violation record
+        foreach ($riwayatPelanggarans as $riwayat) {
+            $status = $statusOptions[array_rand($statusOptions)];
+            $nominal = $riwayat->pelanggaran->denda ?? 10000;
+
+            // If paid, set payment date between violation date and now
+            $tanggalBayar = null;
+            if ($status === 'dibayar') {
+                $tanggalBayar = \Carbon\Carbon::parse($riwayat->tanggal)->addDays(rand(1, 30))->format('Y-m-d');
+            }
+
+            Denda::create([
+                'id_denda' => Str::uuid(),
+                'id_riwayat_pelanggaran' => $riwayat->id_riwayat_pelanggaran,
+                'nominal' => $nominal,
+                'status_bayar' => $status,
+                'tanggal_bayar' => $tanggalBayar,
+            ]);
+        }
     }
 }

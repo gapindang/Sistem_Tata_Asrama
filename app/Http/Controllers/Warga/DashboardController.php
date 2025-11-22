@@ -15,7 +15,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $warga = $user->warga ?? null;
+        $warga = $user->wargaAsrama ?? null;
 
         $totalPoinPelanggaran = 0;
         $totalPoinPenghargaan = 0;
@@ -42,7 +42,18 @@ class DashboardController extends Controller
             $notifikasiCount = Pemberitahuan::where('id_user', $user->id_user)->where('status_baca', 0)->count();
         }
 
+        // Count violations and achievements
+        $countPelanggaran = 0;
+        $countPenghargaan = 0;
+
+        if ($warga) {
+            $countPelanggaran = RiwayatPelanggaran::where('id_warga', $warga->id_warga)->count();
+            $countPenghargaan = RiwayatPenghargaan::where('id_warga', $warga->id_warga)->count();
+        }
+
         $data = [
+            'pelanggaran' => $countPelanggaran,
+            'penghargaan' => $countPenghargaan,
             'poin_pelanggaran' => $totalPoinPelanggaran,
             'poin_penghargaan' => $totalPoinPenghargaan,
             'denda' => $totalDenda,

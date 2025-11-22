@@ -10,8 +10,8 @@ class PenghargaanController extends Controller
 {
     public function index()
     {
-        $penghargaan = Penghargaan::all();
-        return view('petugas.penghargaan.index', compact('penghargaan'));
+        $penghargaans = Penghargaan::all();
+        return view('petugas.penghargaan.index', compact('penghargaans'));
     }
 
     public function create()
@@ -27,7 +27,11 @@ class PenghargaanController extends Controller
             'deskripsi' => 'nullable|string',
         ]);
 
-        Penghargaan::create($validated);
+        $penghargaan = Penghargaan::create($validated);
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'penghargaan' => $penghargaan]);
+        }
 
         return redirect()->route('petugas.penghargaan.index')->with('success', 'Data penghargaan berhasil ditambahkan.');
     }
@@ -50,13 +54,32 @@ class PenghargaanController extends Controller
 
         $penghargaan->update($validated);
 
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'penghargaan' => $penghargaan]);
+        }
+
         return redirect()->route('petugas.penghargaan.index')->with('success', 'Data penghargaan berhasil diperbarui.');
+    }
+
+    public function show($id)
+    {
+        $penghargaan = Penghargaan::findOrFail($id);
+
+        if (request()->wantsJson()) {
+            return response()->json($penghargaan);
+        }
+
+        return view('petugas.penghargaan.show', compact('penghargaan'));
     }
 
     public function destroy($id)
     {
         $penghargaan = Penghargaan::findOrFail($id);
         $penghargaan->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Data penghargaan berhasil dihapus.']);
+        }
 
         return redirect()->route('petugas.penghargaan.index')->with('success', 'Data penghargaan berhasil dihapus.');
     }

@@ -37,7 +37,7 @@ class RiwayatPelanggaranController extends Controller
             'id_warga' => $request->id_warga,
             'id_pelanggaran' => $request->id_pelanggaran,
             'tanggal' => $request->tanggal,
-            'status_sanksi' => $request->input('status_sanksi', 'diproses'),
+            'status_sanksi' => $request->input('status_sanksi', 'proses'),
             'id_petugas' => Auth::id(),
         ];
 
@@ -50,17 +50,18 @@ class RiwayatPelanggaranController extends Controller
 
         $riwayat = RiwayatPelanggaran::create($data);
 
-        // Load relationships untuk email
         $riwayat->load(['warga', 'pelanggaran']);
 
-        // Send email notification jika warga memiliki email
         if ($riwayat->warga && $riwayat->warga->user && $riwayat->warga->user->email) {
             try {
                 Mail::to($riwayat->warga->user->email)->send(new PelanggaranNotification($riwayat));
             } catch (\Exception $e) {
-                // Log error but don't block the process
                 Log::error('Failed to send pelanggaran notification: ' . $e->getMessage());
             }
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Pelanggaran berhasil dicatat', 'riwayat' => $riwayat]);
         }
 
         return redirect()->route('petugas.warga.show', [$request->id_warga])->with('success', 'Pelanggaran berhasil dicatat.');

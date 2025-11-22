@@ -12,7 +12,7 @@ class PelanggaranController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $warga = $user->warga ?? null;
+        $warga = $user->wargaAsrama ?? null;
 
         $riwayat = collect();
         if ($warga) {

@@ -15,10 +15,15 @@ class Pemberitahuan extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['id_user', 'pesan', 'jenis', 'tanggal', 'status_baca'];
+    protected $fillable = ['id_user', 'id_berita', 'pesan', 'jenis', 'tanggal', 'status_baca'];
 
     public function pengguna()
     {
         return $this->belongsTo(Pengguna::class, 'id_user');
+    }
+
+    public function berita()
+    {
+        return $this->belongsTo(Berita::class, 'id_berita', 'id_berita');
     }
 }

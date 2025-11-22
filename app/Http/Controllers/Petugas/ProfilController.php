@@ -22,9 +22,11 @@ class ProfilController extends Controller
 
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
-            'email' => 'required|email|unique:pengguna,email,' . $user->id_user . ',id_user',
             'password' => 'nullable|string|min:6|confirmed',
         ]);
+
+        // Email tidak dapat diubah - hapus dari validated data
+        unset($validated['email']);
 
         if (!empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);

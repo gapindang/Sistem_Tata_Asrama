@@ -10,8 +10,8 @@ class PelanggaranController extends Controller
 {
     public function index()
     {
-        $pelanggaran = Pelanggaran::all();
-        return view('admin.pelanggaran.index', compact('pelanggaran'));
+        $pelanggarans = Pelanggaran::all();
+        return view('admin.pelanggaran.index', compact('pelanggarans'));
     }
 
     public function create()

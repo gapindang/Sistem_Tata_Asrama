@@ -21,4 +21,10 @@ class Denda extends Model
     {
         return $this->belongsTo(RiwayatPelanggaran::class, 'id_riwayat_pelanggaran');
     }
+
+    // Accessor untuk mendapatkan petugas melalui riwayat pelanggaran
+    public function getPetugasAttribute()
+    {
+        return $this->riwayatPelanggaran?->petugas;
+    }
 }

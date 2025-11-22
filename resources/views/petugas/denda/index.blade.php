@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
-                <button type="button" class="btn btn-primary btn-lg" id="btnTambahDenda" onclick="btnTambahDenda();">
+                <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#modalDenda">
                     <i class="bi bi-plus-circle me-2"></i>Tambah Denda
                 </button>
             </div>
@@ -158,19 +158,26 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <button class="btn btn-outline-info"
-                                                onclick="showDendaById('{{ $item->id_denda }}')" title="Lihat Detail"
-                                                data-bs-toggle="tooltip">
+                                            @if ($item->status_bayar == 'belum' && $item->bukti_bayar)
+                                                <button class="btn btn-outline-success btn-approve"
+                                                    data-id="{{ $item->id_denda }}" title="Approve">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-reject"
+                                                    data-id="{{ $item->id_denda }}" title="Reject">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            @endif
+                                            <button class="btn btn-outline-info btn-detail"
+                                                data-id="{{ $item->id_denda }}" title="Lihat Detail">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button class="btn btn-outline-warning"
-                                                onclick="openEditModalById('{{ $item->id_denda }}')" title="Edit"
-                                                data-bs-toggle="tooltip">
+                                            <button class="btn btn-outline-warning btn-edit"
+                                                data-id="{{ $item->id_denda }}" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-outline-danger"
-                                                onclick="deleteDenda('{{ $item->id_denda }}')" title="Hapus"
-                                                data-bs-toggle="tooltip">
+                                            <button class="btn btn-outline-danger btn-delete"
+                                                data-id="{{ $item->id_denda }}" title="Hapus">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -228,29 +235,30 @@
 
     {{-- Modal Form --}}
     <div class="modal fade" id="modalDenda" tabindex="-1" aria-labelledby="modalDendaLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content border-0">
+        <div class="modal-dialog">
+            <div class="modal-content border-0" style="border-radius: 15px;">
                 <form id="formDenda" enctype="multipart/form-data">
                     @csrf
-                    <div class="modal-header bg-gradient"
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <h5 class="modal-title text-white" id="modalTitle">
+                    <div class="modal-header"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title text-white fw-bold" id="modalTitle">
                             <i class="bi bi-plus-circle me-2"></i>Tambah Denda
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body p-3">
                         <input type="hidden" id="id_denda" name="id_denda">
                         <input type="hidden" id="edit_mode" name="_method" value="">
 
-                        <div class="mb-4">
-                            <label for="id_riwayat_pelanggaran" class="form-label fw-semibold">
-                                <i class="bi bi-person-check me-2"></i>Riwayat Pelanggaran <span
+                        <div class="mb-3">
+                            <label for="id_riwayat_pelanggaran" class="form-label fw-semibold"
+                                style="font-size: 0.9rem;">
+                                <i class="bi bi-person-check me-1"></i>Riwayat Pelanggaran <span
                                     class="text-danger">*</span>
                             </label>
-                            <select id="id_riwayat_pelanggaran" name="id_riwayat_pelanggaran"
-                                class="form-select form-select-lg" required>
+                            <select id="id_riwayat_pelanggaran" name="id_riwayat_pelanggaran" class="form-select"
+                                required>
                                 <option value="">-- Pilih Riwayat Pelanggaran --</option>
                                 @if (isset($allRiwayat) && $allRiwayat->count() > 0)
                                     @foreach ($allRiwayat as $r)
@@ -268,59 +276,54 @@
                                 @endif
                             </select>
                             @if (isset($allRiwayat) && $allRiwayat->whereNull('denda')->count() == 0)
-                                <div class="alert alert-warning mt-2 mb-0">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                <div class="alert alert-warning mt-2 mb-0 py-2"
+                                    style="font-size: 0.85rem; border-radius: 8px;">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
                                     Semua riwayat sudah memiliki denda atau belum ada riwayat.
                                 </div>
                             @endif
                         </div>
 
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="nominal" class="form-label fw-semibold">
-                                    <i class="bi bi-currency-dollar me-2"></i>Nominal Denda <span
-                                        class="text-danger">*</span>
-                                </label>
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text fw-semibold">Rp</span>
-                                    <input type="number" id="nominal" name="nominal" class="form-control"
-                                        min="0" step="1000" required placeholder="0"
-                                        onInput="formatNominal(this)">
-                                </div>
-                                <small class="text-muted d-block mt-2">Masukkan nominal dalam rupiah</small>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="status_bayar" class="form-label fw-semibold">
-                                    <i class="bi bi-flag me-2"></i>Status Bayar
-                                </label>
-                                <select id="status_bayar" name="status_bayar" class="form-select form-select-lg">
-                                    <option value="belum">Belum Dibayar</option>
-                                    <option value="dibayar">Sudah Dibayar</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-4" id="tanggalBayarWrapper">
-                            <label for="tanggal_bayar" class="form-label fw-semibold">
-                                <i class="bi bi-calendar-event me-2"></i>Tanggal Bayar
-                            </label>
-                            <input type="date" id="tanggal_bayar" name="tanggal_bayar"
-                                class="form-control form-control-lg">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="bukti_bayar" class="form-label fw-semibold">
-                                <i class="bi bi-file-earmark-arrow-up me-2"></i>Bukti Bayar
+                        <div class="mb-3">
+                            <label for="nominal" class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                <i class="bi bi-currency-dollar me-1"></i>Nominal Denda <span class="text-danger">*</span>
                             </label>
                             <div class="input-group">
-                                <input type="file" id="bukti_bayar" name="bukti_bayar" class="form-control"
-                                    accept=".jpg,.jpeg,.png,.pdf" onchange="previewBukti(this)">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" id="nominal" name="nominal" class="form-control" min="0"
+                                    step="1000" required placeholder="0" onInput="formatNominal(this)">
                             </div>
-                            <small class="text-muted d-block mt-2">Format: JPG, PNG, PDF (Max: 5MB)</small>
-                            <div id="buktiPreview" class="mt-3"></div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Masukkan nominal dalam rupiah</small>
                         </div>
+
+                        <div class="mb-3" id="statusBayarGroup">
+                            <label for="status_bayar" class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                <i class="bi bi-flag me-1"></i>Status Bayar
+                            </label>
+                            <select id="status_bayar" name="status_bayar" class="form-select">
+                                <option value="belum">Belum Dibayar</option>
+                                <option value="dibayar">Sudah Dibayar</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="tanggalBayarWrapper" style="display: none;">
+                            <label for="tanggal_bayar" class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                <i class="bi bi-calendar-event me-1"></i>Tanggal Bayar
+                            </label>
+                            <input type="date" id="tanggal_bayar" name="tanggal_bayar" class="form-control">
+                        </div>
+
+                        <div class="mb-3" id="buktiWrapper" style="display: none;">
+                            <label for="bukti_bayar" class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                <i class="bi bi-file-earmark-arrow-up me-1"></i>Bukti Bayar
+                            </label>
+                            <input type="file" id="bukti_bayar" name="bukti_bayar" class="form-control"
+                                accept=".jpg,.jpeg,.png,.pdf" onchange="previewBukti(this)">
+                            <small class="text-muted" style="font-size: 0.75rem;">Format: JPG, PNG, PDF (Max: 5MB)</small>
+                        </div>
+                        <div id="buktiPreview" class="mt-2"></div>
                     </div>
-                    <div class="modal-footer border-top">
+                    <div class="modal-footer bg-light" style="border-radius: 0 0 15px 15px;">
                         <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary btn-lg" id="btnSubmit">
                             <span class="spinner-border spinner-border-sm d-none me-2" role="status"
@@ -371,7 +374,6 @@
         // ==================== Variables ====================
         let isEdit = false;
         let dendaMap = {};
-        let currentModal = null;
 
         // Load data denda ke JavaScript object
         @foreach ($denda as $item)
@@ -393,9 +395,6 @@
             };
         @endforeach
 
-        console.log('✅ Data denda loaded:', Object.keys(dendaMap).length, 'records');
-
-        // ==================== Utility Functions ====================
         function formatRupiah(angka) {
             return new Intl.NumberFormat('id-ID', {
                 minimumFractionDigits: 0,
@@ -479,7 +478,6 @@
         }
 
         function showAlert(message, type = 'success') {
-            // Bisa diganti dengan toast notification
             const alertType = type === 'success' ? 'success' : 'danger';
             const alertHtml = `
                 <div class="alert alert-${alertType} alert-dismissible fade show" role="alert">
@@ -488,14 +486,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             `;
-            // Insert ke top of page
             const container = document.querySelector('.container-fluid');
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = alertHtml;
             container.insertBefore(tempDiv.firstElementChild, container.firstChild);
         }
 
-        // ==================== Modal Functions ====================
         function btnTambahDenda() {
             console.log('🔵 btnTambahDenda called');
 
@@ -507,23 +503,19 @@
                 document.getElementById('edit_mode').value = '';
                 document.getElementById('buktiPreview').innerHTML = '';
 
-                // Enable riwayat pelanggaran select
                 const selectRiwayat = document.getElementById('id_riwayat_pelanggaran');
                 if (selectRiwayat) {
                     selectRiwayat.disabled = false;
                 }
 
-                // Show modal
                 const modalElement = document.getElementById('modalDenda');
                 if (modalElement) {
-                    console.log('✅ Modal element found, showing modal...');
-                    currentModal = new bootstrap.Modal(modalElement);
-                    currentModal.show();
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modalInstance.show();
                 } else {
-                    console.error('❌ Modal element not found!');
+                    alert('Error: Modal tidak ditemukan!');
                 }
             } catch (error) {
-                console.error('❌ Error in btnTambahDenda:', error);
                 alert('Terjadi kesalahan saat membuka modal: ' + error.message);
             }
         }
@@ -615,7 +607,9 @@
                 </div>
             `;
 
-            new bootstrap.Modal(document.getElementById('modalDendaDetail')).show();
+            const modalElement = document.getElementById('modalDendaDetail');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            modal.show();
         }
 
         function openEditModalById(id) {
@@ -633,12 +627,13 @@
             document.getElementById('status_bayar').value = data.status_bayar;
             document.getElementById('tanggal_bayar').value = data.tanggal_bayar || '';
 
-            // Populate riwayat pelanggaran
+            const nominalInput = document.getElementById('nominal');
+            if (nominalInput) nominalInput.disabled = true;
+
             const selectRiwayat = document.getElementById('id_riwayat_pelanggaran');
             selectRiwayat.value = data.id_riwayat_pelanggaran;
-            selectRiwayat.disabled = true; // Disable saat edit
+            selectRiwayat.disabled = true;
 
-            // Show existing bukti bayar
             const preview = document.getElementById('buktiPreview');
             if (data.bukti_bayar) {
                 const ext = data.bukti_bayar.split('.').pop().toLowerCase();
@@ -652,8 +647,8 @@
                             ${isImage 
                                 ? `<img src="/storage/${data.bukti_bayar}" class="img-thumbnail" style="max-height: 80px; cursor: pointer;" onclick="window.open('/storage/${data.bukti_bayar}', '_blank')">`
                                 : `<a href="/storage/${data.bukti_bayar}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                        <i class="bi bi-file-pdf me-1"></i>Lihat PDF
-                                                       </a>`
+                                                                                                                                    <i class="bi bi-file-pdf me-1"></i>Lihat PDF
+                                                                                                                                   </a>`
                             }
                         </div>
                     </div>
@@ -662,11 +657,18 @@
                 preview.innerHTML = '';
             }
 
-            currentModal = new bootstrap.Modal(document.getElementById('modalDenda'));
-            currentModal.show();
+            const statusGroup = document.getElementById('statusBayarGroup');
+            if (statusGroup) statusGroup.style.display = '';
+            const buktiWrapper = document.getElementById('buktiWrapper');
+            if (buktiWrapper) buktiWrapper.style.display = 'none';
+            const tanggalWrapper = document.getElementById('tanggalBayarWrapper');
+            if (tanggalWrapper) tanggalWrapper.style.display = 'none';
+
+            const modalElement = document.getElementById('modalDenda');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            modal.show();
         }
 
-        // ==================== CRUD Operations ====================
         function deleteDenda(id) {
             if (!confirm('⚠️ Apakah Anda yakin ingin menghapus denda ini?\n\nTindakan ini tidak dapat dibatalkan.')) return;
 
@@ -705,46 +707,126 @@
                 });
         }
 
+        function approveDenda(id) {
+            if (!confirm('✅ Approve pembayaran denda ini?')) return;
+
+            fetch(`/petugas/denda/${id}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showAlert('Pembayaran berhasil diapprove', 'success');
+                        setTimeout(() => location.reload(), 500);
+                    } else {
+                        showAlert((result.message || 'Gagal approve'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Terjadi kesalahan', 'error');
+                });
+        }
+
+        function rejectDenda(id) {
+            if (!confirm('Reject pembayaran denda ini?\n\nBukti pembayaran akan dihapus.')) return;
+
+            fetch(`/petugas/denda/${id}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        showAlert('Pembayaran berhasil direject', 'success');
+                        setTimeout(() => location.reload(), 500);
+                    } else {
+                        showAlert((result.message || 'Gagal reject'), 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Terjadi kesalahan', 'error');
+                });
+        }
+
         // ==================== Event Listeners ====================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 DOM loaded, initializing...');
 
-            // Check if Bootstrap is loaded
+            if (window.dendaPageInitialized) {
+                return;
+            }
+
+            window.dendaPageInitialized = true;
+
+            $('#id_riwayat_pelanggaran').select2({
+                theme: 'bootstrap-5',
+                dropdownParent: $('#modalDenda'),
+                placeholder: '-- Pilih Riwayat Pelanggaran --',
+                allowClear: true,
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return "Tidak ada data ditemukan";
+                    },
+                    searching: function() {
+                        return "Mencari...";
+                    }
+                }
+            });
+
             if (typeof bootstrap === 'undefined') {
-                console.error('❌ Bootstrap JS not loaded!');
                 alert('Error: Bootstrap JavaScript tidak ditemukan. Pastikan Bootstrap JS sudah diload di layout.');
-            } else {
-                console.log('✅ Bootstrap JS loaded');
-            }
+            } else {}
 
-            // Initialize tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
-
-            // Button Tambah Denda
-            const btnTambah = document.getElementById('btnTambahDenda');
-            if (btnTambah) {
-                console.log('✅ Button Tambah Denda found');
-                btnTambah.addEventListener('click', function(e) {
-                    console.log('🔵 Button clicked!');
-                    e.preventDefault();
-                    btnTambahDenda();
-                });
-            } else {
-                console.error('❌ Button Tambah Denda not found!');
-            }
-
-            // Check if modal exists
             const modalElement = document.getElementById('modalDenda');
             if (modalElement) {
-                console.log('✅ Modal element found');
+                console.log('Modal element found');
+
+                // Reset modal only when explicitly opened for "add" mode
+                // The edit mode is handled by openEditModalById() function
+                modalElement.addEventListener('show.bs.modal', function(event) {
+                    // If modal is opened via openEditModalById(), isEdit will be true
+                    // Don't reset the form in that case
+                    if (!isEdit) {
+                        // This is "add" mode
+                        document.getElementById('modalTitle').innerHTML =
+                            '<i class="bi bi-plus-circle me-2"></i>Tambah Denda';
+                        document.getElementById('formDenda').reset();
+                        document.getElementById('id_denda').value = '';
+                        document.getElementById('edit_mode').value = '';
+                        document.getElementById('buktiPreview').innerHTML = '';
+
+                        const selectRiwayat = document.getElementById('id_riwayat_pelanggaran');
+                        if (selectRiwayat) {
+                            selectRiwayat.disabled = false;
+                        }
+
+                        $('#id_riwayat_pelanggaran').val(null).trigger('change');
+
+                        const statusGroup = document.getElementById('statusBayarGroup');
+                        if (statusGroup) statusGroup.style.display = 'none';
+                        const tanggalWrapper = document.getElementById('tanggalBayarWrapper');
+                        if (tanggalWrapper) tanggalWrapper.style.display = 'none';
+                        const buktiWrapper = document.getElementById('buktiWrapper');
+                        if (buktiWrapper) buktiWrapper.style.display = 'none';
+                        const nominalInput = document.getElementById('nominal');
+                        if (nominalInput) nominalInput.disabled = false;
+                    }
+                });
             } else {
-                console.error('❌ Modal element not found!');
+                console.error('Modal element not found!');
             }
 
-            // Form Submit
             const formDenda = document.getElementById('formDenda');
             if (formDenda) {
                 formDenda.addEventListener('submit', function(e) {
@@ -752,13 +834,23 @@
 
                     const id = document.getElementById('id_denda').value;
                     const url = isEdit ? `/petugas/denda/${id}` : '/petugas/denda';
-                    const method = isEdit ? 'POST' : 'POST'; // Laravel uses POST with _method
+                    const method = isEdit ? 'POST' : 'POST';
 
                     const formData = new FormData(this);
 
-                    // Add _method for PUT request
                     if (isEdit) {
                         formData.append('_method', 'PUT');
+                        if ((formData.get('status_bayar') || '') === 'dibayar') {
+                            const today = new Date().toISOString().slice(0, 10);
+                            formData.set('tanggal_bayar', today);
+                        } else {
+                            formData.delete('tanggal_bayar');
+                        }
+                        formData.delete('bukti_bayar');
+                    } else {
+                        formData.set('status_bayar', 'belum');
+                        formData.delete('tanggal_bayar');
+                        formData.delete('bukti_bayar');
                     }
 
                     showLoading(true);
@@ -780,47 +872,41 @@
                             showLoading(false);
 
                             if (result.success) {
-                                showAlert(isEdit ? '✅ Denda berhasil diupdate' :
-                                    '✅ Denda berhasil ditambahkan', 'success');
+                                showAlert(isEdit ? 'Denda berhasil diupdate' :
+                                    'Denda berhasil ditambahkan', 'success');
 
-                                // Close modal
-                                if (currentModal) {
-                                    currentModal.hide();
+                                const modalEl = document.getElementById('modalDenda');
+                                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                                if (modalInstance) {
+                                    modalInstance.hide();
                                 }
 
-                                // Reload page after short delay
+                                $('#id_riwayat_pelanggaran').val(null).trigger('change');
+
                                 setTimeout(() => {
                                     location.reload();
                                 }, 500);
                             } else {
-                                showAlert('❌ Gagal menyimpan: ' + (result.message ||
+                                showAlert('Gagal menyimpan: ' + (result.message ||
                                     'Terjadi kesalahan'), 'error');
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
                             showLoading(false);
-                            showAlert('❌ Terjadi kesalahan jaringan', 'error');
+                            showAlert('Terjadi kesalahan jaringan', 'error');
                         });
                 });
             }
 
-            // Status bayar change handler
             const statusBayar = document.getElementById('status_bayar');
             if (statusBayar) {
                 statusBayar.addEventListener('change', function() {
                     const tanggalWrapper = document.getElementById('tanggalBayarWrapper');
-                    if (this.value === 'dibayar') {
-                        tanggalWrapper.style.display = 'block';
-                        document.getElementById('tanggal_bayar').required = true;
-                    } else {
-                        tanggalWrapper.style.display = 'block';
-                        document.getElementById('tanggal_bayar').required = false;
-                    }
+                    if (tanggalWrapper) tanggalWrapper.style.display = 'none';
                 });
             }
 
-            // Search functionality
             const searchDenda = document.getElementById('searchDenda');
             if (searchDenda) {
                 searchDenda.addEventListener('keyup', function() {
@@ -838,7 +924,75 @@
                 });
             }
 
+            document.body.addEventListener('click', function(e) {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                const id = target.dataset.id;
+                if (!id) return;
+
+                if (target.classList.contains('btn-detail')) {
+                    e.preventDefault();
+                    showDendaById(id);
+                } else if (target.classList.contains('btn-edit')) {
+                    e.preventDefault();
+                    openEditModalById(id);
+                } else if (target.classList.contains('btn-delete')) {
+                    e.preventDefault();
+                    deleteDenda(id);
+                } else if (target.classList.contains('btn-approve')) {
+                    e.preventDefault();
+                    approveDenda(id);
+                } else if (target.classList.contains('btn-reject')) {
+                    e.preventDefault();
+                    rejectDenda(id);
+                }
+            });
+
             console.log('✅ Initialization complete');
         });
     </script>
+
+    <style>
+        /* Custom Select2 styling for Denda Modal */
+        .select2-container--bootstrap-5 .select2-selection {
+            min-height: 38px;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.9rem;
+            border-radius: 0.375rem;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            line-height: 1.5;
+            padding-left: 0;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+
+        .select2-container--bootstrap-5.select2-container--open .select2-selection {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+
+        .select2-container--bootstrap-5 .select2-dropdown {
+            border-color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .select2-container--bootstrap-5 .select2-results__option--highlighted {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .select2-container--bootstrap-5 .select2-search__field {
+            font-size: 0.9rem;
+        }
+
+        /* Disabled option styling */
+        .select2-results__option[aria-disabled="true"] {
+            opacity: 0.6;
+            font-style: italic;
+        }
+    </style>
 @endpush

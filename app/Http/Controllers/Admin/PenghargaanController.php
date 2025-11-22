@@ -10,8 +10,8 @@ class PenghargaanController extends Controller
 {
     public function index()
     {
-        $penghargaan = Penghargaan::all();
-        return view('admin.penghargaan.index', compact('penghargaan'));
+        $penghargaans = Penghargaan::all();
+        return view('admin.penghargaan.index', compact('penghargaans'));
     }
 
     public function create()

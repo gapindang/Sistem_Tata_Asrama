@@ -13,7 +13,7 @@ class PenggunaSeeder extends Seeder
      */
     public function run(): void
     {
-
+        // Admin Users
         Pengguna::create([
             'nama' => 'Admin Utama',
             'email' => 'admin@sitama.com',
@@ -22,17 +22,32 @@ class PenggunaSeeder extends Seeder
         ]);
 
         Pengguna::create([
-            'nama' => 'Petugas Satu',
-            'email' => 'petugas@sitama.com',
+            'nama' => 'Admin Kedua',
+            'email' => 'admin2@sitama.com',
+            'password' => Hash::make('admin123'),
+            'role' => 'admin',
+        ]);
+
+        // Petugas Users
+        Pengguna::create([
+            'nama' => 'Petugas Bambang',
+            'email' => 'petugas1@sitama.com',
             'password' => Hash::make('petugas123'),
             'role' => 'petugas',
         ]);
 
         Pengguna::create([
-            'nama' => 'Warga Satu',
-            'email' => 'warga@sitama.com',
-            'password' => Hash::make('warga123'),
-            'role' => 'warga',
+            'nama' => 'Petugas Siti',
+            'email' => 'petugas2@sitama.com',
+            'password' => Hash::make('petugas123'),
+            'role' => 'petugas',
+        ]);
+
+        Pengguna::create([
+            'nama' => 'Petugas Andi',
+            'email' => 'petugas3@sitama.com',
+            'password' => Hash::make('petugas123'),
+            'role' => 'petugas',
         ]);
     }
 }

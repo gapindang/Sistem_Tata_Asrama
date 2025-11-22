@@ -9,8 +9,12 @@ class WargaController extends Controller
 {
     public function index()
     {
-        // TODO: Implement logic to list warga for warga role
-        return view('warga.warga.index');
+        // Get all active warga for directory/contact list
+        $wargas = \App\Models\WargaAsrama::where('status', 'aktif')
+            ->orderBy('nama', 'asc')
+            ->get();
+
+        return view('warga.warga.index', compact('wargas'));
     }
 
     public function create()
