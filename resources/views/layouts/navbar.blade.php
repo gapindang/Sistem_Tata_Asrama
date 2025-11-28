@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top"
-    style="background: linear-gradient(90deg, #0d6efd 0%, #0a58ca 100%);">
+    style="background: linear-gradient(90deg, #910dfdff 0%, #662accff 100%);">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
             <i class="bi bi-building me-2" style="font-size: 24px;"></i>
