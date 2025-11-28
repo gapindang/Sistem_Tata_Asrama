@@ -23,14 +23,14 @@
         }
 
         .sidebar {
-            height: 100vh;
+            height: calc(100vh - 60px);
             width: 250px;
             position: fixed;
-            top: 0;
+            top: 60px;
             left: 0;
             background: linear-gradient(180deg, #0d6efd 0%, #0a58ca 100%);
             color: white;
-            padding-top: 70px;
+            padding-top: 20px;
             transition: transform 0.3s ease-in-out;
             z-index: 1000;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
