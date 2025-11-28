@@ -2,8 +2,7 @@
     style="background: linear-gradient(90deg, #910dfdff 0%, #662accff 100%);">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="#">
-            <i class="bi bi-building me-2" style="font-size: 24px;"></i>
-            <span>SITAMA</span>
+            <img src="{{ asset('images/SITAMA.png') }}" alt="SITAMA Logo" class="navbar-logo">
         </a>
 
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -104,6 +103,16 @@
         letter-spacing: 1px;
     }
 
+    .navbar-logo {
+        height: 40px;
+        width: auto;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-logo:hover {
+        transform: scale(1.05);
+    }
+
     .nav-link {
         padding: 0.5rem 1rem;
         border-radius: 8px;
@@ -158,6 +167,10 @@
     }
 
     @media (max-width: 768px) {
+        .navbar-logo {
+            height: 32px;
+        }
+
         .navbar-brand span {
             font-size: 18px;
         }

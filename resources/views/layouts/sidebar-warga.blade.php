@@ -1,5 +1,8 @@
 <div class="sidebar">
-    <h5 class="text-center fw-bold mb-4">Warga Asrama</h5>
+    <div class="sidebar-header text-center mb-3">
+        <img src="{{ asset('images/SITAMA.png') }}" alt="SITAMA Logo" class="sidebar-logo mb-2">
+        <h5 class="fw-bold mb-0">Warga Asrama</h5>
+    </div>
     <a href="{{ route('warga.dashboard') }}" class="{{ Request::routeIs('warga.dashboard') ? 'active' : '' }}">
         <i class="bi bi-speedometer2 me-2"></i>Dashboard
     </a>

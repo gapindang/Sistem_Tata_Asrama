@@ -37,12 +37,22 @@
             overflow-y: auto;
         }
 
-        .sidebar h5 {
-            padding: 0 20px;
-            margin-bottom: 20px;
-            font-size: 18px;
+        .sidebar-header {
+            padding: 0 20px 15px 20px;
             border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo {
+            height: 50px;
+            width: auto;
+            max-width: 180px;
+            object-fit: contain;
+        }
+
+        .sidebar h5 {
+            font-size: 16px;
+            margin-top: 8px;
         }
 
         .sidebar a {
