@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Pengguna;
 use App\Models\WargaAsrama;
+use App\Models\RiwayatPelanggaran;
+use App\Models\RiwayatPenghargaan;
+use App\Models\Denda;
 
 class ProfilController extends Controller
 {
@@ -14,7 +17,37 @@ class ProfilController extends Controller
     {
         $user = Auth::user();
         $warga = $user->wargaAsrama ?? null;
-        return view('warga.profil.index', compact('user', 'warga'));
+        $data = [
+            'pelanggaran' => 0,
+            'penghargaan' => 0,
+            'denda' => 0,
+            'poin_pelanggaran' => 0,
+            'poin_penghargaan' => 0,
+        ];
+
+        if ($warga) {
+            $riwayatPelanggaran = RiwayatPelanggaran::with('pelanggaran')
+                ->where('id_warga', $warga->id_warga)
+                ->get();
+            $data['pelanggaran'] = $riwayatPelanggaran->count();
+            $data['poin_pelanggaran'] = $riwayatPelanggaran->sum(function ($r) {
+                return $r->pelanggaran->poin ?? 0;
+            });
+
+            $riwayatPenghargaan = RiwayatPenghargaan::with('penghargaan')
+                ->where('id_warga', $warga->id_warga)
+                ->get();
+            $data['penghargaan'] = $riwayatPenghargaan->count();
+            $data['poin_penghargaan'] = $riwayatPenghargaan->sum(function ($r) {
+                return $r->penghargaan->poin_reward ?? 0;
+            });
+
+            $data['denda'] = Denda::whereHas('riwayatPelanggaran', function ($q) use ($warga) {
+                $q->where('id_warga', $warga->id_warga);
+            })->sum('nominal');
+        }
+
+        return view('warga.profil.index', compact('user', 'warga', 'data'));
     }
 
     public function update(Request $request)

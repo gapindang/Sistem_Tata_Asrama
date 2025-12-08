@@ -175,7 +175,7 @@
     <div class="login-container">
         <div class="login-left">
             <h1><i class="bi bi-house-door-fill"></i> SITAMA</h1>
-            <p>Sistem Informasi Tata Tertib Asrama - Kelola pelanggaran dan penghargaan mahasiswa asrama dengan mudah
+            <p>Sistem Informasi Tata Kelola Asrama - Kelola pelanggaran dan penghargaan mahasiswa asrama dengan mudah
                 dan efisien.</p>
         </div>
 

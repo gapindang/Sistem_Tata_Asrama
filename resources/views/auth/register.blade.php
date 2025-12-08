@@ -166,7 +166,7 @@
     <div class="register-container">
         <div class="register-left">
             <h1><i class="bi bi-house-door-fill"></i> SITAMA</h1>
-            <p>Sistem Informasi Tata Tertib Asrama - Bergabunglah dengan sistem manajemen asrama yang modern dan
+            <p>Sistem Informasi Tata Kelola Asrama - Bergabunglah dengan sistem manajemen asrama yang modern dan
                 efisien.</p>
         </div>
 

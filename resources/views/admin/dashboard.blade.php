@@ -88,13 +88,77 @@
             </div>
         </div>
 
+        {{-- Quick Actions --}}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-lightning-charge-fill me-2"></i>Aksi Cepat</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-3 col-6">
+                                <a href="{{ route('admin.riwayat-penghargaan.create') }}" class="text-decoration-none">
+                                    <div class="quick-action-card p-4 text-center">
+                                        <div class="icon-circle mx-auto mb-3"
+                                            style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                            <i class="bi bi-award-fill"></i>
+                                        </div>
+                                        <h6 class="fw-semibold mb-1">Beri Penghargaan</h6>
+                                        <small class="text-muted">Berikan reward</small>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <a href="{{ route('admin.warga.index') }}" class="text-decoration-none">
+                                    <div class="quick-action-card p-4 text-center">
+                                        <div class="icon-circle mx-auto mb-3"
+                                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                            <i class="bi bi-people-fill"></i>
+                                        </div>
+                                        <h6 class="fw-semibold mb-1">Data Warga</h6>
+                                        <small class="text-muted">Kelola warga</small>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <a href="{{ route('admin.denda.index') }}" class="text-decoration-none">
+                                    <div class="quick-action-card p-4 text-center">
+                                        <div class="icon-circle mx-auto mb-3"
+                                            style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                                            <i class="bi bi-cash-coin"></i>
+                                        </div>
+                                        <h6 class="fw-semibold mb-1">Kelola Denda</h6>
+                                        <small class="text-muted">Approve pembayaran</small>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <a href="{{ route('admin.laporan.index') }}" class="text-decoration-none">
+                                    <div class="quick-action-card p-4 text-center">
+                                        <div class="icon-circle mx-auto mb-3"
+                                            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                            <i class="bi bi-file-earmark-text-fill"></i>
+                                        </div>
+                                        <h6 class="fw-semibold mb-1">Laporan</h6>
+                                        <small class="text-muted">Export data</small>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Charts Row 1 --}}
         <div class="row mb-4 g-3">
             {{-- Weekly Trend --}}
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-white border-bottom py-3">
-                        <h6 class="fw-bold mb-0"><i class="bi bi-graph-up me-2"></i>Trend Pelanggaran (7 Hari Terakhir)</h6>
+                        <h6 class="fw-bold mb-0"><i class="bi bi-graph-up me-2"></i>Trend Pelanggaran (7 Hari Terakhir)
+                        </h6>
                     </div>
                     <div class="card-body p-4">
                         <canvas id="weeklyTrendChart" height="80"></canvas>
@@ -175,6 +239,37 @@
 
         .card:hover {
             transform: translateY(-2px);
+        }
+
+        .quick-action-card {
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #f0f0f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .quick-action-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-card:hover .icon-circle {
+            transform: scale(1.1) rotate(5deg);
         }
     </style>
 

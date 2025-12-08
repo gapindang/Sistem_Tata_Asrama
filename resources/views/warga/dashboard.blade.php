@@ -182,7 +182,7 @@
         <!-- Welcome Banner -->
         <div class="welcome-banner">
             <h2><i class="bi bi-emoji-smile"></i> Halo, {{ Auth::user()->nama }}!</h2>
-            <p>Selamat datang kembali di Sistem Informasi Tata Tertib Asrama</p>
+            <p>Selamat datang kembali di Sistem Informasi Tata Kelola Asrama</p>
         </div>
 
         <!-- Statistics Cards -->

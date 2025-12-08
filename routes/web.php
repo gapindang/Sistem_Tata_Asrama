@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PelanggaranController;
 use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\PenghargaanController;
 use App\Http\Controllers\Admin\RiwayatController;
+use App\Http\Controllers\Admin\RiwayatPenghargaanController as AdminRiwayatPenghargaanController;
 use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -37,12 +38,12 @@ Route::get('/', function () {
             case 'warga':
                 return redirect()->route('warga.dashboard');
             default:
-                return redirect('/login');
+                return redirect()->route('login');
         }
     }
 
     return redirect()->route('login');
-});
+})->name('home');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'index'])->name('register');
@@ -143,6 +144,20 @@ Route::middleware(['auth'])->group(function () {
                 ->name('admin.penghargaan.destroy');
             Route::get('/penghargaan/{id}', [PenghargaanController::class, 'show'])
                 ->name('admin.penghargaan.show');
+
+            // Riwayat Penghargaan (Beri Penghargaan)
+            Route::get('/riwayat-penghargaan', [AdminRiwayatPenghargaanController::class, 'index'])
+                ->name('admin.riwayat-penghargaan.index');
+            Route::get('/riwayat-penghargaan/create', [AdminRiwayatPenghargaanController::class, 'create'])
+                ->name('admin.riwayat-penghargaan.create');
+            Route::post('/riwayat-penghargaan', [AdminRiwayatPenghargaanController::class, 'store'])
+                ->name('admin.riwayat-penghargaan.store');
+            Route::get('/riwayat-penghargaan/{id}/edit', [AdminRiwayatPenghargaanController::class, 'edit'])
+                ->name('admin.riwayat-penghargaan.edit');
+            Route::put('/riwayat-penghargaan/{id}', [AdminRiwayatPenghargaanController::class, 'update'])
+                ->name('admin.riwayat-penghargaan.update');
+            Route::delete('/riwayat-penghargaan/{id}', [AdminRiwayatPenghargaanController::class, 'destroy'])
+                ->name('admin.riwayat-penghargaan.destroy');
 
             Route::get('/denda', [DendaController::class, 'index'])->name('admin.denda.index');
             Route::post('/denda', [DendaController::class, 'store'])->name('admin.denda.store');

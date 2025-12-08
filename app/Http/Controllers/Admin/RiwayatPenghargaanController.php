@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Petugas;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -23,7 +23,7 @@ class RiwayatPenghargaanController extends Controller
         $warga = WargaAsrama::all();
         $penghargaan = Penghargaan::all();
 
-        return view('petugas.riwayat-penghargaan.index', compact('riwayat', 'warga', 'penghargaan'));
+        return view('admin.riwayat-penghargaan.index', compact('riwayat', 'warga', 'penghargaan'));
     }
 
     public function create()
@@ -31,7 +31,7 @@ class RiwayatPenghargaanController extends Controller
         $warga = WargaAsrama::all();
         $penghargaan = Penghargaan::all();
 
-        return view('petugas.riwayat-penghargaan.create', compact('warga', 'penghargaan'));
+        return view('admin.riwayat-penghargaan.create', compact('warga', 'penghargaan'));
     }
 
     public function store(Request $request)
@@ -42,13 +42,14 @@ class RiwayatPenghargaanController extends Controller
             'tanggal' => 'required|date',
         ]);
 
-        // Tambahkan id_petugas dari user yang sedang login
+        // Tambahkan id_petugas dari user yang sedang login (admin)
         $validated['id_petugas'] = Auth::user()->id_user;
 
         $riwayat = RiwayatPenghargaan::create($validated);
 
         $riwayat->load(['warga', 'penghargaan']);
 
+        // Kirim notifikasi email
         if ($riwayat->warga && $riwayat->warga->user && $riwayat->warga->user->email) {
             try {
                 Mail::to($riwayat->warga->user->email)->send(new PenghargaanNotification($riwayat));
@@ -57,11 +58,21 @@ class RiwayatPenghargaanController extends Controller
             }
         }
 
+        // Buat pemberitahuan di sistem
+        if ($riwayat->warga && $riwayat->warga->user) {
+            \App\Models\Pemberitahuan::create([
+                'id_user' => $riwayat->warga->user->id_user,
+                'judul' => 'Penghargaan Baru',
+                'pesan' => 'Selamat! Anda mendapatkan penghargaan "' . $riwayat->penghargaan->nama_penghargaan . '" dengan poin reward ' . $riwayat->penghargaan->poin_reward . ' poin.',
+                'status_baca' => 0,
+            ]);
+        }
+
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json(['success' => true, 'riwayat' => $riwayat]);
         }
 
-        return redirect()->route('petugas.riwayat-penghargaan.index')
+        return redirect()->route('admin.riwayat-penghargaan.index')
             ->with('success', 'Penghargaan berhasil diberikan dan notifikasi telah dikirim.');
     }
 
@@ -74,7 +85,32 @@ class RiwayatPenghargaanController extends Controller
             return response()->json(['success' => true]);
         }
 
-        return redirect()->route('petugas.riwayat-penghargaan.index')
+        return redirect()->route('admin.riwayat-penghargaan.index')
             ->with('success', 'Riwayat penghargaan berhasil dihapus.');
+    }
+
+    public function edit($id)
+    {
+        $riwayat = RiwayatPenghargaan::findOrFail($id);
+        $warga = WargaAsrama::all();
+        $penghargaan = Penghargaan::all();
+
+        return view('admin.riwayat-penghargaan.edit', compact('riwayat', 'warga', 'penghargaan'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $riwayat = RiwayatPenghargaan::findOrFail($id);
+
+        $validated = $request->validate([
+            'id_warga' => 'required|string|exists:warga_asrama,id_warga',
+            'id_penghargaan' => 'required|string|exists:penghargaan,id_penghargaan',
+            'tanggal' => 'required|date',
+        ]);
+
+        $riwayat->update($validated);
+
+        return redirect()->route('admin.riwayat-penghargaan.index')
+            ->with('success', 'Riwayat penghargaan berhasil diperbarui.');
     }
 }

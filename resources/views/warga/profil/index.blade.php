@@ -389,7 +389,7 @@
                     <i class="bi bi-exclamation-triangle"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">0</div>
+                    <div class="stat-value">{{ $data['pelanggaran'] ?? 0 }}</div>
                     <div class="stat-label">Pelanggaran</div>
                 </div>
             </div>
@@ -398,7 +398,7 @@
                     <i class="bi bi-trophy"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">0</div>
+                    <div class="stat-value">{{ $data['penghargaan'] ?? 0 }}</div>
                     <div class="stat-label">Penghargaan</div>
                 </div>
             </div>
@@ -407,7 +407,7 @@
                     <i class="bi bi-cash-coin"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value">0</div>
+                    <div class="stat-value">Rp {{ number_format($data['denda'] ?? 0, 0, ',', '.') }}</div>
                     <div class="stat-label">Denda</div>
                 </div>
             </div>
@@ -446,7 +446,8 @@
                     </div>
                     <div class="info-row">
                         <div class="info-label">Bergabung Sejak</div>
-                        <div class="info-value">{{ \Carbon\Carbon::parse(Auth::user()->created_at)->format('d F Y') }}</div>
+                        <div class="info-value">{{ \Carbon\Carbon::parse(Auth::user()->created_at)->format('d F Y') }}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -242,7 +242,7 @@
         <div class="verify-left">
             <i class="bi bi-shield-check"></i>
             <h2>SITAMA</h2>
-            <p>Sistem Informasi Tata Tertib Asrama - Verifikasi identitas Anda dengan kode OTP yang telah dikirimkan ke
+            <p>Sistem Informasi Tata Kelola Asrama - Verifikasi identitas Anda dengan kode OTP yang telah dikirimkan ke
                 email Anda.</p>
         </div>
 

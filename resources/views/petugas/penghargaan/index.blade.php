@@ -78,15 +78,23 @@
         {{-- Search & Table Section --}}
         <div class="card border-0 shadow-sm" style="border-radius: 15px;">
             <div class="card-header bg-white border-bottom py-3">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="fw-bold mb-0">
                         <i class="bi bi-table me-2" style="color: #43e97b;"></i>Daftar Penghargaan
                     </h5>
-                    <div class="input-group" style="max-width: 300px;">
-                        <span class="input-group-text bg-white">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control" id="searchPenghargaan" placeholder="Cari penghargaan...">
+                    <div class="d-flex gap-2 align-items-center">
+                        {{-- <button type="button" class="btn btn-sm"
+                            style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none;"
+                            data-bs-toggle="modal" data-bs-target="#beriPenghargaanModal">
+                            <i class="bi bi-plus-circle me-1"></i>Beri Penghargaan
+                        </button> --}}
+                        <div class="input-group" style="max-width: 250px;">
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="searchPenghargaan"
+                                placeholder="Cari penghargaan...">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -194,12 +202,122 @@
                     </div>
                 </div>
                 <div class="modal-footer bg-light" style="border-radius: 0 0 15px 15px;">
-                    <a href="{{ route('petugas.penghargaan.create') }}" class="btn"
-                        style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none;">
+                    <button type="button" class="btn"
+                        style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none;"
+                        data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#beriPenghargaanModal">
                         <i class="bi bi-plus-circle me-1"></i>Beri Penghargaan
-                    </a>
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-circle me-1"></i>Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Beri Penghargaan --}}
+    <div class="modal fade" id="beriPenghargaanModal" tabindex="-1" aria-labelledby="beriPenghargaanModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 15px; border: none;">
+                <div class="modal-header"
+                    style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title fw-bold" id="beriPenghargaanModalLabel">
+                        <i class="bi bi-award-fill me-2"></i>Beri Penghargaan
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <form id="formBeriPenghargaan">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                <i class="bi bi-person-fill me-1" style="color: #667eea;"></i>Warga Asrama
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select name="id_warga" class="form-select" id="selectWargaPenghargaan" required>
+                                <option value="">-- Pilih Warga --</option>
+                                @foreach (\App\Models\WargaAsrama::all() as $w)
+                                    <option value="{{ $w->id_warga }}" data-nama="{{ $w->nama }}"
+                                        data-nim="{{ $w->nim ?? '-' }}" data-kamar="{{ $w->nomor_kamar ?? '-' }}">
+                                        {{ $w->nama }} - {{ $w->nim ?? 'Tanpa NIM' }} (Kamar
+                                        {{ $w->nomor_kamar ?? '-' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div id="wargaInfoPenghargaan" class="alert alert-info d-none mb-3 py-2"
+                            style="border-radius: 8px; border-left: 3px solid #43e97b;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div
+                                    style="width: 35px; height: 35px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1rem;">
+                                    <span id="wargaInitialPenghargaan"></span>
+                                </div>
+                                <div>
+                                    <div class="mb-0 fw-bold" style="font-size: 0.9rem;" id="wargaNamaPenghargaan"></div>
+                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                        <i class="bi bi-card-text me-1"></i><span id="wargaNimPenghargaan"></span> |
+                                        <i class="bi bi-door-closed ms-2 me-1"></i>Kamar <span
+                                            id="wargaKamarPenghargaan"></span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                <i class="bi bi-trophy-fill me-1" style="color: #43e97b;"></i>Jenis Penghargaan
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select name="id_penghargaan" class="form-select" id="selectPenghargaanModal" required>
+                                <option value="">-- Pilih Penghargaan --</option>
+                                @foreach ($penghargaans as $p)
+                                    <option value="{{ $p->id_penghargaan }}" data-poin="{{ $p->poin_reward }}"
+                                        data-deskripsi="{{ $p->deskripsi }}">
+                                        {{ $p->nama_penghargaan }} (+{{ $p->poin_reward }} Poin)
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div id="penghargaanInfo" class="alert alert-success d-none mb-3 py-2"
+                            style="border-radius: 8px; border-left: 3px solid #43e97b;">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div style="flex: 1;">
+                                    <div class="fw-bold mb-1" style="font-size: 0.85rem;">
+                                        <i class="bi bi-info-circle me-1"></i>Detail Penghargaan
+                                    </div>
+                                    <p class="mb-0" style="font-size: 0.75rem;" id="penghargaanDeskripsiModal"></p>
+                                </div>
+                                <div class="text-end ms-2">
+                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Poin Reward</small>
+                                    <div class="fw-bold" style="color: #43e97b; font-size: 1.2rem;">
+                                        +<span id="penghargaanPoinModal"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" style="font-size: 0.9rem;">
+                                <i class="bi bi-calendar-event me-1" style="color: #667eea;"></i>Tanggal
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" name="tanggal" class="form-control" id="inputTanggalPenghargaan"
+                                value="{{ date('Y-m-d') }}" max="{{ date('Y-m-d') }}" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light" style="border-radius: 0 0 15px 15px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Batal
+                    </button>
+                    <button type="button" class="btn"
+                        style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; border: none;"
+                        id="btnSubmitPenghargaan">
+                        <i class="bi bi-check-circle me-1"></i>Beri Penghargaan
                     </button>
                 </div>
             </div>
@@ -241,7 +359,15 @@
     </style>
 @endsection
 
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
+@endpush
+
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -287,6 +413,120 @@
 
                 const modal = new bootstrap.Modal($('#detailModal')[0]);
                 modal.show();
+            });
+
+            // Initialize Select2 for Beri Penghargaan Modal
+            $('#selectWargaPenghargaan').select2({
+                theme: 'bootstrap-5',
+                placeholder: '-- Pilih Warga --',
+                dropdownParent: $('#beriPenghargaanModal')
+            });
+
+            $('#selectPenghargaanModal').select2({
+                theme: 'bootstrap-5',
+                placeholder: '-- Pilih Penghargaan --',
+                dropdownParent: $('#beriPenghargaanModal')
+            });
+
+            // Show warga info when selected
+            $('#selectWargaPenghargaan').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const nama = selectedOption.data('nama');
+                const nim = selectedOption.data('nim');
+                const kamar = selectedOption.data('kamar');
+
+                if (nama) {
+                    const initial = nama.charAt(0).toUpperCase();
+                    $('#wargaInitialPenghargaan').text(initial);
+                    $('#wargaNamaPenghargaan').text(nama);
+                    $('#wargaNimPenghargaan').text(nim);
+                    $('#wargaKamarPenghargaan').text(kamar);
+                    $('#wargaInfoPenghargaan').removeClass('d-none');
+                } else {
+                    $('#wargaInfoPenghargaan').addClass('d-none');
+                }
+            });
+
+            // Show penghargaan info when selected
+            $('#selectPenghargaanModal').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const poin = selectedOption.data('poin');
+                const deskripsi = selectedOption.data('deskripsi');
+
+                if (poin) {
+                    $('#penghargaanPoinModal').text(poin);
+                    $('#penghargaanDeskripsiModal').text(deskripsi || '-');
+                    $('#penghargaanInfo').removeClass('d-none');
+                } else {
+                    $('#penghargaanInfo').addClass('d-none');
+                }
+            });
+
+            // Submit Beri Penghargaan
+            $('#btnSubmitPenghargaan').on('click', function() {
+                const form = $('#formBeriPenghargaan');
+                const formData = new FormData(form[0]);
+
+                // Validate form
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
+
+                // Disable button
+                $(this).prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...');
+
+                $.ajax({
+                    url: '{{ route('petugas.riwayat-penghargaan.store') }}',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success message
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: 'Penghargaan berhasil diberikan dan notifikasi telah dikirim.',
+                                confirmButtonColor: '#43e97b'
+                            }).then(() => {
+                                // Close modal and reload page
+                                $('#beriPenghargaanModal').modal('hide');
+                                location.reload();
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Terjadi kesalahan saat memberikan penghargaan.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: errorMsg,
+                            confirmButtonColor: '#dc3545'
+                        });
+
+                        // Enable button
+                        $('#btnSubmitPenghargaan').prop('disabled', false).html(
+                            '<i class="bi bi-check-circle me-1"></i>Beri Penghargaan');
+                    }
+                });
+            });
+
+            // Reset form when modal is closed
+            $('#beriPenghargaanModal').on('hidden.bs.modal', function() {
+                $('#formBeriPenghargaan')[0].reset();
+                $('#selectWargaPenghargaan').val('').trigger('change');
+                $('#selectPenghargaanModal').val('').trigger('change');
+                $('#wargaInfoPenghargaan').addClass('d-none');
+                $('#penghargaanInfo').addClass('d-none');
+                $('#btnSubmitPenghargaan').prop('disabled', false).html(
+                    '<i class="bi bi-check-circle me-1"></i>Beri Penghargaan');
             });
         });
     </script>
