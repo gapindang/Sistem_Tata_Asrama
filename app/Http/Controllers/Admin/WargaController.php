@@ -33,41 +33,54 @@ class WargaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'role' => 'required|in:warga,petugas',
             'nama' => 'required|string|max:255',
-            'nim' => 'required|string|max:50|unique:warga_asrama,nim',
-            'kamar' => 'required|string|max:20',
-            'angkatan' => 'required|integer',
-            'status' => 'required|in:aktif,nonaktif',
             'email' => 'required|email|unique:pengguna,email',
             'password' => 'required|min:6',
         ]);
 
+        $role = $request->input('role', 'warga');
+
+        // if role is warga, validate warga-specific fields
+        if ($role === 'warga') {
+            $request->validate([
+                'nim' => 'required|string|max:50|unique:warga_asrama,nim',
+                'kamar' => 'required|string|max:20',
+                'angkatan' => 'required|integer',
+                'status' => 'required|in:aktif,nonaktif',
+            ]);
+        }
+
         DB::beginTransaction();
 
         try {
+            // create pengguna with chosen role
             $pengguna = Pengguna::create([
                 'id_user' => Str::uuid(),
                 'nama' => $validated['nama'],
                 'email' => $validated['email'],
                 'password' => bcrypt($validated['password']),
-                'role' => 'warga',
+                'role' => $role,
             ]);
 
-            $warga = WargaAsrama::create([
-                'id_warga' => Str::uuid(),
-                'id_user' => $pengguna->id_user,
-                'nama' => $validated['nama'],
-                'nim' => $validated['nim'],
-                'kamar' => $validated['kamar'],
-                'angkatan' => $validated['angkatan'],
-                'status' => $validated['status'],
-            ]);
+            $warga = null;
+            if ($role === 'warga') {
+                $warga = WargaAsrama::create([
+                    'id_warga' => Str::uuid(),
+                    'id_user' => $pengguna->id_user,
+                    'nama' => $validated['nama'],
+                    'nim' => $request->input('nim'),
+                    'kamar' => $request->input('kamar'),
+                    'angkatan' => $request->input('angkatan'),
+                    'status' => $request->input('status'),
+                ]);
+            }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Warga dan pengguna berhasil dibuat!',
+                'message' => ($role === 'warga' ? 'Warga dan pengguna berhasil dibuat!' : 'Pengguna petugas berhasil dibuat!'),
                 'data' => [
                     'pengguna' => $pengguna,
                     'warga' => $warga,
@@ -133,18 +146,33 @@ class WargaController extends Controller
     public function filter(Request $request)
     {
         $query = WargaAsrama::query();
+        // normalize and trim inputs to avoid filtering issues
+        $nama = $request->has('nama') ? trim($request->input('nama')) : null;
+        $nim = $request->has('nim') ? trim($request->input('nim')) : null;
+        $kamar = $request->has('kamar') ? trim($request->input('kamar')) : null;
+        $angkatan = $request->has('angkatan') ? trim($request->input('angkatan')) : null;
+        $status = $request->has('status') ? trim($request->input('status')) : null;
 
-        if ($request->filled('nama')) {
-            $query->where('nama', 'like', '%' . $request->nama . '%');
+        if (!empty($nama)) {
+            $query->where('nama', 'like', '%' . $nama . '%');
         }
-        if ($request->filled('nim')) {
-            $query->where('nim', $request->nim);
+
+        if (!empty($nim)) {
+            // use partial match for nim as users may type prefix
+            $query->where('nim', 'like', '%' . $nim . '%');
         }
-        if ($request->filled('angkatan')) {
-            $query->where('angkatan', $request->angkatan);
+
+        if (!empty($kamar)) {
+            // use partial match to be resilient to spacing/case
+            $query->where('kamar', 'like', '%' . $kamar . '%');
         }
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+
+        if (!empty($angkatan)) {
+            $query->where('angkatan', $angkatan);
+        }
+
+        if (!empty($status)) {
+            $query->where('status', $status);
         }
 
         $wargas = $query->get();

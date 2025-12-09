@@ -187,9 +187,17 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label>Nama</label>
-                            <input type="text" name="nama" class="form-control" required>
-                        </div>
+                                <label>Role</label>
+                                <select name="role" id="roleSelect" class="form-select">
+                                    <option value="warga" selected>Warga</option>
+                                    <option value="petugas">Petugas</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Nama</label>
+                                <input type="text" name="nama" class="form-control" required>
+                            </div>
                         <div class="mb-3">
                             <label>NIM</label>
                             <input type="text" name="nim" class="form-control" required>
@@ -202,20 +210,22 @@
                             <label>Password</label>
                             <input type="text" name="password" class="form-control" required>
                         </div>
-                        <div class="mb-3">
-                            <label>Kamar</label>
-                            <input type="text" name="kamar" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Angkatan</label>
-                            <input type="number" name="angkatan" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label>Status</label>
-                            <select name="status" class="form-select" required>
-                                <option value="aktif">Aktif</option>
-                                <option value="nonaktif">Nonaktif</option>
-                            </select>
+                        <div class="warga-only">
+                            <div class="mb-3">
+                                <label>Kamar</label>
+                                <input type="text" name="kamar" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label>Angkatan</label>
+                                <input type="number" name="angkatan" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label>Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="aktif">Aktif</option>
+                                    <option value="nonaktif">Nonaktif</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -409,7 +419,8 @@
                         data: $(this).serialize(),
                         success: function(res) {
                             $('#addModal').modal('hide');
-                            $(this).trigger('reset');
+                            // reset the form
+                            $('#formTambahWarga')[0].reset();
                             loadWargaTable();
                             alert('Warga berhasil ditambahkan!');
                         },
@@ -420,6 +431,23 @@
                         }
                     });
                 });
+
+                // Toggle warga-only fields when role changes
+                function toggleWargaFields() {
+                    const role = $('#roleSelect').val();
+                    const isWarga = role === 'warga';
+                    if (isWarga) {
+                        $('.warga-only').show();
+                        $('.warga-only').find('input, select').attr('required', true);
+                    } else {
+                        $('.warga-only').hide();
+                        $('.warga-only').find('input, select').attr('required', false);
+                    }
+                }
+
+                // init and bind
+                toggleWargaFields();
+                $(document).on('change', '#roleSelect', toggleWargaFields);
 
                 $(document).on('click', '.btn-edit', function() {
                     const id = $(this).data('id');
