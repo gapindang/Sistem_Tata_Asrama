@@ -65,13 +65,25 @@ class DashboardController extends Controller
         $dendaSudahBayar = Denda::where('status_bayar', 'dibayar')->count();
 
         // Monthly revenue (12 bulan terakhir)
+        // Prefer `tanggal_bayar` (payment date) when available; fallback to `created_at`.
         $monthlyRevenue = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
-            $total = Denda::whereYear('created_at', $month->year)
-                ->whereMonth('created_at', $month->month)
-                ->where('status_bayar', 'dibayar')
+
+            $total = Denda::where('status_bayar', 'dibayar')
+                ->where(function ($q) use ($month) {
+                    // payments that have a payment date in this month
+                    $q->whereYear('tanggal_bayar', $month->year)
+                        ->whereMonth('tanggal_bayar', $month->month);
+                })
+                ->orWhere(function ($q) use ($month) {
+                    // or records without tanggal_bayar but created in this month
+                    $q->whereNull('tanggal_bayar')
+                        ->whereYear('created_at', $month->year)
+                        ->whereMonth('created_at', $month->month);
+                })
                 ->sum('nominal');
+
             $monthlyRevenue[] = [
                 'month' => $month->format('M Y'),
                 'total' => $total
